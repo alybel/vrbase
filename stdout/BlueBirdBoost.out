@@ -1,0 +1,12 @@
+../accounts/BlueBirdBoost/
+running account:
+BlueBirdBoost
+already added number of users today: 7
+length in config file has changed, tailoring...
+new array length 120
+1931 friends found
+successfully loaded cyclic array with array
+309 statuses found
+successfully loaded cyclic array with array
+[{u'message': u'Over capacity', u'code': 130}]
+Twitter error response: status code = 414

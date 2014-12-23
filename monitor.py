@@ -3,6 +3,7 @@
 import glob
 import vr_main
 import time
+import smtplib
 
 def account_name_from_path(path = ""):
     return path.split("/")[1].split(".")[0]
@@ -17,8 +18,32 @@ def run_monitoring():
                     #Only print something if a process exists. Otherwise produce no printout"
                     result = vr_main.stop_account(account_name, auto_call = True)
                     if result:
+                        send_report(account_name)
                         with open("monitoring_logfile.txt","a") as logfile:
-                            logfile.write("%s;%s;%s" % (str(time.ctime(time.time())), "accountkilled", account_name))
+                            logfile.write("%s;%s;%s \n" % (str(time.ctime(time.time())), "accountkilled", account_name))
+
+
+
+
+def send_report(account_name):
+    sender = "a.beck@valureach.com"
+    receivers = ["a.beck@valureach.com"]
+
+    message = """From: Valureach Warning System
+To: Alexander Beck
+Subject: Account killed: %s
+
+empty
+
+""" % account_name
+
+    try:
+        smtpObj = smtplib.SMTP('smtp.valureach.com', 25)
+        smtpObj.sendmail(sender, receivers, message)
+    except SMTPException:
+        pass
+
+
 
 if __name__ == "__main__":
     while True:

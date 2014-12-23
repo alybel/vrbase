@@ -12,3 +12,5 @@
 config.py
 config.pyc
 
+/.idea
+

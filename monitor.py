@@ -14,6 +14,8 @@ def err_exception(line = ""):
     """
     if "414" in line:
         return True
+    if "ValueError" in line:
+        return True
 
 def run_monitoring():
     fl = glob.glob("stdout/*.out")

@@ -8,12 +8,21 @@ import smtplib
 def account_name_from_path(path = ""):
     return path.split("/")[1].split(".")[0]
 
+def err_exception(line = ""):
+    """
+    list the exceptions even if there is an error in the line
+    """
+    if "414" in line:
+        return True
+
 def run_monitoring():
     fl = glob.glob("stdout/*.out")
     for fn in fl:
         with open(fn, "r") as f:
             for line in f:
                 if "error" in line.lower():
+                    if err_exception(line):
+                        continue
                     account_name = account_name_from_path(fn)
                     #Only print something if a process exists. Otherwise produce no printout"
                     result = vr_main.stop_account(account_name, auto_call = True)

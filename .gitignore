@@ -1,6 +1,7 @@
 #compiled and emacs_saved python files
 *.pyc
 *.py~
+*.*~
 
 #Logfiles
 *.log

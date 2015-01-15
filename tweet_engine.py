@@ -90,4 +90,9 @@ def all_accounts():
 
 if __name__ == "__main__":
     #all_accounts()
-    tweet_account("BlueBirdBoost")
+    args = sys.argv
+    if not len(args) == 2:
+        print "usage: tweet_engine.py <account_name>"
+        sys.exit()
+    print "starting for account", args[1]
+    tweet_account(args[1])

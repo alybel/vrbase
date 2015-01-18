@@ -8,9 +8,14 @@ valureach_ops_path = "/home/alex/valureach_ops"
 sys.path.append("%s/bluebird" % valureach_ops_path)
 import bblib as bbl
 import random
+import vr_main
+import subprocess
 
 import multiprocessing as mp
 from multiprocessing import Pool
+
+def rtime():
+    return int(random.random()*10*60)
 
 def tweet_account(account_name=""):
     print "starting", account_name
@@ -46,7 +51,7 @@ def tweet_account(account_name=""):
         with open(logfile, 'a') as f:
             f.write("tweetid:%d\n"%res.id)
         print account_name, "tweeted:", sel_tweet
-        #time.sleep(freq/3)
+        time.sleep(rtime())
         #retweet tweets from friended accounts
         for account in tweet.watch_account:
             print "seeking for tweets to retweet in", account
@@ -67,32 +72,93 @@ def tweet_account(account_name=""):
                             print e
                             print "retweet not carried out", tweet_id
         print "reached sleep point"
-        time.sleep(freq/3)
+        time.sleep(freq)
         #remove own tweets
-        api.destroy_status(res.id)
+        try:
+            api.destroy_status(res.id)
+        except:
+            pass
         print account_name, "status deleted"
         with open(logfile, 'a') as f:
             f.write("deleted-tweetiid:%d\n"%res.id)
-        time.sleep(freq/3)
         f = open(logfile, "w")
         f.close()
+        time.sleep(rtime())
 
-def all_accounts():
-    pool = mp.Pool(processes=2)
-    try:
-        results = [pool.apply(tweet_account, args=(x,)) for x in ["BlueBirdBoost", "sweetorangesoc"]]
-    except KeyboardInterrupt:
-        sys.exit()
-    except Exception,e:
-        print e
+def clean_account(account, api = None):
+    """
+    not used yet
+    """
+    if not api:
+        api = get_account_api(account)
+    account_path = "%s/accounts/%s/" % (valureach_ops_path, account_name)
+    logfile = "%stweet_engine.log"%account_path
+    if os.path.isfile(logfile):
+        with open(logfile, 'r') as f:
+            for line in f:
+                if "tweetid" in line:
+                    tweet_id  = line.strip("\n").split(":")[1]
+                    try:
+                        api.destroy_status(tweet_id)
+                        print account_name,"tweet destroyed in ramping up", tweet_id
+                    except:
+                        pass   
         
-    print(results)
+def get_account_api(account):
+    account_path = "%s/accounts/%s/" % (valureach_ops_path, account_name)
+    sys.path.append(account_path)
+    import config as cfg
+    bbl.set_cfg(cfg)  
+    auth, api = bbl.connect_app_to_twitter()
+    return api
+
+def start_account(account):
+    if os.path.isfile("accounts/%s/.tweet_engine_lock" % account):
+        print "tweet engine Account", account, "is locked. is already running?"
+        return False
+    print "starting account", account
+    with open("stdout/tweet_engine_%s.out" % account, "w") as f:
+        subprocess.Popen(["./tweet_engine.py", "%s" % account], stdout=f)
+    subprocess.call(["touch","accounts/%s/.tweet_engine_lock" % account])
+    return True  
+
+def stop_account(account):
+    procname = "tweet_engine.py"
+    subprocess.call(["rm","accounts/%s/.tweet_engine_lock" % account])
+    print "lockfile removed"
+    for proc in psutil.process_iter():
+        if proc.name() == procname and account in proc.cmdline()[-1]:
+            print "killing", proc.cmdline()
+            psutil.Process(proc.pid).kill()
+            return True
+    if not auto_call:
+        print "no running tweet engine proccess for account", account, "could be found"
+    return False
+
+def remove_all_lockfiles():
+    accounts = get_accounts()
+    for account in accounts:
+        subprocess.call(["rm","accounts/%s/.tweet_engine_lock" % account])
+    print "all tweet_engine lockfiles removed"
+
+def start_all():
+    accounts = vr_main.get_accounts()
+    for account in accounts:
+        start_account(account)
 
 if __name__ == "__main__":
-    #all_accounts()
     args = sys.argv
     if not len(args) == 2:
         print "usage: tweet_engine.py <account_name>"
+        print "other options: all, stopall"
         sys.exit()
     print "starting for account", args[1]
-    tweet_account(args[1])
+    if args[1] == "all":
+        start_all()
+    elif args[1] == "stopall":
+        subprocess.call(["killall", "tweet_engine.py"])
+        subprocess.call(["killall", "tweet_engine.py"])
+        remove_all_lockfiles()
+        
+    else:
+        tweet_account(args[1])

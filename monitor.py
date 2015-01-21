@@ -16,6 +16,8 @@ def err_exception(line = ""):
         return True
     if "ValueError" in line:
         return True
+    if "TypeError" in line:
+        return True
 
 def run_monitoring():
     fl = glob.glob("stdout/*.out")

@@ -471,18 +471,21 @@ def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
         for status in random.sample(statuses, stat_diff+20):
             try:
                 api.destroy_status(status.id)
-                logr.info("cleanupremovestatus %s"%status.id)
+                logr.info("cleanupremovestatus %s %d" % (status.id, stat_diff))
                 statuses.pop(statuses.index(status))
+                stat_diff -= 1
             except:
                 pass
     print len(statuses)
     ca_stat.load_with_array(statuses)
 
     if me.favourites_count > cfg.number_active_favorites+9:
+        fav_diff = me.favourites_count - cfg.number_active_favorites
         for fav in api.favorites():
             try:
                 remove_favorite(fav.id, api)
-                logr.info("cleanupremovefavorite %s"(fav.id))
+                logr.info("cleanupremovefavorite %s %d"(fav.id, fav_diff))
+                fav_diff -= 1
             except:
                 pass
 
@@ -492,7 +495,25 @@ def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
 #Test Connect to Stream
 ###
 ###
-        
+
+
+def get_recent_follows(days = 50):
+    today = datetime.date.today()
+    begin_date = today - datetime.timedelta(days = days)
+    res = []
+    logfile = "../accounts/%s/bluebird.log" % (cfg.own_twittername if cfg else "AlexanderD_Beck")
+    with open(logfile, 'r') as f:
+        for line in f:
+            if "$$followinguser" in line:
+                lv = line.split(';')
+                strdate = lv[0].split(" ")[0]
+                y,m,d = [int(x) for x in strdate.split('-')]
+                if begin_date < datetime.date(y,m,d):
+                    res.append(int(lv[1].split(',')[0]))
+    return set(res)
+
+
+
 
 class DummyListener(tweepy.StreamListener):
     def __init__(self):
@@ -530,4 +551,5 @@ def test_stream():
 if __name__ == '__main__':
     from pprint import pprint
     #connect_app_to_twitter()
-    test_stream()
+    #test_stream()
+    get_recent_follows()

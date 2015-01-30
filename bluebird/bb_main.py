@@ -19,6 +19,7 @@ logr = logging.getLogger('logger')
 hdlr_1 = None
 TextBuilder = None
 
+recent_follows = []
 
 def lp(s):
     """print this line if verbose is true """
@@ -67,6 +68,7 @@ def retweet_management(t, ca, api):
 
 
 def follow_management(t, ca, api):
+    global recent_follows
     lp("entering follow management")
     if ca.isin(t.user_id):
         return False
@@ -74,6 +76,7 @@ def follow_management(t, ca, api):
     if not status:
         return False
     ca.add(t.user_screen_name)
+    recent_follows.append(t.user_id)
     next_entry = ca.get_next_entry()
     if next_entry:
         try: bbl.remove_follow(next_entry, api)
@@ -148,6 +151,13 @@ class FavListener(tweepy.StreamListener):
                                        delta_time = cfg.activity_frequency)
         self.tbuffer_fav = tweet_buffer(api = self.api, ca = self.ca, management_fct=favorite_management,
                                         delta_time = cfg.activity_frequency)
+
+        #TODO: ReWrite recent_follows such that vector does not become infinitely long ...
+        global recent_follows
+        recent_follows = list(bbl.get_recent_follows(days = 50))
+        print len(recent_follows), "recent follows prevented from following here"
+        print "last follow", recent_follows[-1]
+
         #self.tbuffer_status = tweet_buffer(api = self.api, ca = self.ca_st, management_fct=follow_management)
 
     def on_data(self, data):
@@ -190,6 +200,10 @@ class FavListener(tweepy.StreamListener):
             self.ca_recent_r.add(t.text, auto_increase = True)
         #Manage Follows
         if score >= cfg.follow_score:
+            #Check if the person to follow has been already followed in the past X days. In this case, do not follow again until this period is over.
+            if int(t.user_id) in recent_follows:
+                logr.info("refollowprevented;%s"%(t.user_id))
+                return True
             self.tbuffer.add_to_buffer(t, score)
         return True
 

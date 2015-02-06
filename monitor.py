@@ -39,6 +39,7 @@ def run_monitoring():
 
 
 def send_report(account_name):
+    return 
     sender = "a.beck@valureach.com"
     receivers = ["a.beck@valureach.com"]
 

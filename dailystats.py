@@ -27,6 +27,7 @@ def all_stats():
     send_report()
 
 def send_report():
+    return True
     sender = "a.beck@valureach.com"
     receivers = ["a.beck@valureach.com", "al.d.beck@gmail.com"]
 

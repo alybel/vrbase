@@ -1,5 +1,3 @@
-#! /usr/bin/python -u
-
 import logging
 import logging.handlers
 import sys
@@ -191,7 +189,7 @@ class FavListener(tweepy.StreamListener):
                     #Introduce some randomness such that not everything is automatically posted
                     if text and random.random() < cfg.status_update_prob:
                         bbl.update_status(text = text, api = self.api)
-        #Manage Retweets
+        #Manage Retweetssour
         if score >= cfg.retweet_score:
             if self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
                 logr.info("retweetprevented2similar;%s"%(t.id))

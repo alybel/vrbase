@@ -28,10 +28,15 @@ def stop_account(account = "", auto_call = False):
     subprocess.call(["rm","accounts/%s/.lock" % account])
     print "lockfile removed"
     for proc in psutil.process_iter():
-        if proc.name() == procname and account in proc.cmdline()[-1]:
-            print "killing", proc.cmdline()
-            psutil.Process(proc.pid).kill()
-            return True
+        try:
+            cmdl = proc.cmdline()
+            if procname in cmdl and account in cmdl[-1]:
+                print "killing", proc.cmdline()
+                psutil.Process(proc.pid).kill()
+                return True
+        except psutil.AccessDenied:
+            #these are root processes that cannot be looked into
+            pass
     if not auto_call:
         print "no running proccess for account", account, "could be found"
     return False
@@ -70,6 +75,8 @@ if __name__ == "__main__":
             subprocess.call(["killall", "bb_main.py"])
             remove_all_lockfiles()
         else:
+            stop_account(arg2)
+            print "second kill for security -- very bad practice"
             stop_account(arg2)
     elif arg1 == "restart":
         if arg2 == "all":

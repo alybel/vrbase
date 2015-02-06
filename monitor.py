@@ -1,5 +1,3 @@
-#! /usr/bin/python -u
-
 import glob
 import vr_main
 import time

@@ -1,5 +1,3 @@
-#! /usr/bin/python -u
-
 import glob
 import subprocess
 import os
@@ -20,7 +18,7 @@ def start_account(account = ""):
     os.chdir("bluebird/")
     print "starting account", account
     with open("../stdout/%s.out" % account, "w") as f:
-        subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout=f)
+        subprocess.Popen(["python", "bb_main.py", "-l%s" % account], stdout=f)
     os.chdir("../")
     subprocess.call(["touch","accounts/%s/.lock" % account])
     return True

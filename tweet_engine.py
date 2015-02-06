@@ -116,7 +116,7 @@ def start_account(account):
         return False
     print "starting account", account
     with open("stdout/tweet_engine_%s.out" % account, "w") as f:
-        subprocess.Popen(["./tweet_engine.py", "%s" % account], stdout=f)
+        subprocess.Popen(["python", "tweet_engine.py", "%s" % account], stdout=f)
     subprocess.call(["touch","accounts/%s/.tweet_engine_lock" % account])
     return True  
 

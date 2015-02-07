@@ -134,7 +134,7 @@ def stop_account(account):
     return False
 
 def remove_all_lockfiles():
-    accounts = get_accounts()
+    accounts = vr_main.get_accounts()
     for account in accounts:
         subprocess.call(["rm","accounts/%s/.tweet_engine_lock" % account])
     print "all tweet_engine lockfiles removed"

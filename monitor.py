@@ -59,5 +59,6 @@ empty
 
 if __name__ == "__main__":
     while True:
-        run_monitoring()
         time.sleep(10)
+        run_monitoring()
+

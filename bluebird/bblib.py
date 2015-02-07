@@ -415,6 +415,7 @@ def remove_follow(screen_name, api):
 
 def get_statuses(api, username = None):
     """
+    important note: this method only returns statuses but not retweets
     :param api: twitter api
     :param username: own twittername or given screen_name
     :return: list of statuses
@@ -425,16 +426,19 @@ def get_statuses(api, username = None):
         max_id = tl[-1].id
     else:
         return []
+    print len(tl)
     while True:
         tlx = api.user_timeline(screen_name = username, count = 200, max_id = max_id)
         if len(tlx)>1:
             tl.extend(tlx)
             if len(tl) > 0:
                 max_id = tl[-1].id
+                print max_id
             else:
                 break
         else:
             break
+    print len(tl)
     return tl
 
 def get_friends_ids(api, user = None):
@@ -465,10 +469,11 @@ def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
     ca_follow.load_with_array(friends_ids)
 
     statuses = get_statuses(api)
-    print len(statuses), "statuses found"
-    stat_diff = me.statuses_count - cfg.number_active_retweets
+    nstatuses = len(statuses)
+    print nstatuses, "statuses (exluding retweets) found"
+    stat_diff = nstatuses - cfg.number_active_retweets
     if stat_diff > 0:
-        for status in random.sample(statuses, stat_diff+20):
+        for status in random.sample(statuses, min(nstatuses, stat_diff+20)):
             try:
                 api.destroy_status(status.id)
                 logr.info("cleanupremovestatus %s %d" % (status.id, stat_diff))
@@ -476,7 +481,6 @@ def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
                 stat_diff -= 1
             except:
                 pass
-    print len(statuses)
     ca_stat.load_with_array(statuses)
 
     if me.favourites_count > cfg.number_active_favorites+9:

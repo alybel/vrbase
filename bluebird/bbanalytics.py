@@ -62,18 +62,20 @@ def loc_filter(loc):
     return generic_filter(loc, locations)
 
 def filter_unwanted_content(t):
-    print t.text
-    print "DESCRIPTION", t.description
-    excluded_content = ["sex", "porn", "drug", "xxx", "naked", "nackt"]
+
+    excluded_content = ["thong", "pussy", "horny", "sex", "porn", "drug", "xxx", "naked", "nackt"]
     for word in excluded_content:
         if word in t.text:
             return False
         if t.description and (word in t.user_description):
             return False
+        if t.user_name and (word in t.user_name):
+            return False
+        if t.user_screen_name and (word in t.user_screen_name):
+            return False
     return True
 
 def filter_tweets(t):
-    print "enter filter tweets function"
     if not filter_unwanted_content(t):
         return False
     if cfg.only_with_url and not is_url_in_tweet(t.text):

@@ -67,7 +67,7 @@ def filter_unwanted_content(t):
     for word in excluded_content:
         if word in t.text:
             return False
-        if t.description and (word in t.user_description):
+        if t.description and (word in t.description):
             return False
         if t.user_name and (word in t.user_name):
             return False
@@ -201,8 +201,9 @@ def minutes_of_day():
 
 if __name__ == "__main__":
     class a:
-        text = "test textsexwef"
-        user_description = "test description"
-
+        text = "test textwef"
+        description = "test description"
+        user_screen_name = "qwdgba"
+        user_name = "sdf afs thong"
     
     print filter_unwanted_content(a)

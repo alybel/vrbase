@@ -19,7 +19,7 @@ def start_account(account = ""):
     print "starting account", account
     outfile = "../stdout/%s.out" % account
     with open(outfile, "w") as f:
-        subprocess.Popen(["python", "bb_main.py", "-l%s" % account], stdout = f, stderr = f)
+        subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout = f, stderr = f)
     os.chdir("../")
     subprocess.call(["touch","accounts/%s/.lock" % account])
     return True
@@ -53,7 +53,6 @@ def remove_all_lockfiles():
     for account in accounts:
         subprocess.call(["rm","accounts/%s/.lock" % account])
     print "all lockfiles removed"
-
 
 if __name__ == "__main__":
     if not len(sys.argv) == 3:

@@ -17,8 +17,9 @@ def start_account(account = ""):
         return False
     os.chdir("bluebird/")
     print "starting account", account
-    with open("../stdout/%s.out" % account, "w") as f:
-        subprocess.Popen(["python", "bb_main.py", "-l%s" % account], stdout=f)
+    outfile = "../stdout/%s.out" % account
+    with open(outfile, "w") as f:
+        subprocess.Popen(["python", "bb_main.py", "-l%s" % account], stdout = f, stderr = f)
     os.chdir("../")
     subprocess.call(["touch","accounts/%s/.lock" % account])
     return True

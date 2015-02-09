@@ -1,3 +1,5 @@
+#! /usr/bin/python -u
+
 import logging
 import logging.handlers
 import sys

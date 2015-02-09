@@ -31,7 +31,9 @@ def stop_account(account = "", auto_call = False):
     for proc in psutil.process_iter():
         try:
             cmdl = proc.cmdline()
-            if procname in cmdl and account in cmdl[-1]:
+            if len(cmdl) < 2:
+                continue
+            if procname in cmdl[-2] and account in cmdl[-1]:
                 print "killing", proc.cmdline()
                 psutil.Process(proc.pid).kill()
                 return True

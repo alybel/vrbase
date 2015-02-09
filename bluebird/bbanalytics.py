@@ -61,8 +61,21 @@ def lan_filter(lan):
 def loc_filter(loc):
     return generic_filter(loc, locations)
 
+def filter_unwanted_content(t):
+    print t.text
+    print "DESCRIPTION", t.description
+    excluded_content = ["sex", "porn", "drug", "xxx", "naked", "nackt"]
+    for word in excluded_content:
+        if word in t.text:
+            return False
+        if t.description and (word in t.user_description):
+            return False
+    return True
 
 def filter_tweets(t):
+    print "enter filter tweets function"
+    if not filter_unwanted_content(t):
+        return False
     if cfg.only_with_url and not is_url_in_tweet(t.text):
         return False
     if cfg.number_hashtags >= 0 and number_hashtags(t.text) > cfg.number_hashtags:
@@ -185,4 +198,9 @@ def minutes_of_day():
 
 
 if __name__ == "__main__":
-    pass
+    class a:
+        text = "test textsexwef"
+        user_description = "test description"
+
+    
+    print filter_unwanted_content(a)

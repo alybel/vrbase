@@ -105,6 +105,7 @@ class tweet_buffer(object):
             self.buffer.append((score,t))
         
     def flush_buffer(self):
+        logr.info("Flush Buffer")
         lp("Flush Buffer!%s"%str(bba.minutes_of_day()))
         self.buffer.sort(reverse = True)
         for i in xrange(min(self.max_number_actions,len(self.buffer))):

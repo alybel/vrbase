@@ -1,4 +1,5 @@
-import glob
+#! /usr/bin/python -u
+
 import sys
 import os.path
 import time
@@ -8,9 +9,6 @@ import bblib as bbl
 import random
 import vr_main
 import subprocess
-
-import multiprocessing as mp
-from multiprocessing import Pool
 
 def rtime():
     return int(random.random()*10*60)

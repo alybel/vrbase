@@ -63,7 +63,7 @@ def loc_filter(loc):
 
 def filter_unwanted_content(t):
 
-    excluded_content = ["thong", "pussy", "horny", "sex", "porn", "drug", "xxx", "naked", "nackt"]
+    excluded_content = ["thong", "pussy", "horny", "sex", "porn", "drug", "xxx", "naked", "nackt", "pussies", "ass", "bikini", "tits", "hot", "sexy", "naughty", "panty", "nasty", "bitch", "toy", "dildo", "vibrator", "upskirt", "downblouse", "strip", "boobs"]
     for word in excluded_content:
         if word in t.text:
             return False

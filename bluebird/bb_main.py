@@ -156,7 +156,11 @@ class FavListener(tweepy.StreamListener):
         global recent_follows
         recent_follows = list(bbl.get_recent_follows(days = 50))
         print len(recent_follows), "recent follows prevented from following here"
-        print "last follow", recent_follows[-1]
+        try:
+            print "last follow", recent_follows[-1]
+        except IndexError:
+            #in case no follows have been carried out yet.
+            pass
 
         #self.tbuffer_status = tweet_buffer(api = self.api, ca = self.ca_st, management_fct=follow_management)
 

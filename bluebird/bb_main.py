@@ -175,6 +175,9 @@ class FavListener(tweepy.StreamListener):
         #Filter Tweets for url in tweet, number hashtags, language and location as in configuration
         if not bba.filter_tweets(t):
             return True
+        if "dump_read" in vars(cfg):
+            if cfg.dump_read == True:
+                logr.info("$$DUMP",t.text, t.user_screen_name, t.description, t.created, t.id)
         #add score if tweet is relevant
         score = bba.score_tweets(t.text, verbose = verbose)
         #Manage Favorites

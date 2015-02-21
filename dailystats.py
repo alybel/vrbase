@@ -86,7 +86,7 @@ def get_report(logfile_path):
         report.write("N retweets: %d \n" % n_retweets)
         report.write("N favorites: %d \n" % n_favorites)
         report.write("N_followers: %d \n" % n_followers)
-        report.write("Last status: %s \n" % bbl.ru(last_status))
+        report.write("Last status: %s \n" % bbl.ru(last_status.replace('\n',' ')))
     contreportname = "%s/report.csv" %get_account_path(logfile_path)
     if not os.path.isfile(contreportname):
         fh = open(contreportname, "w") 

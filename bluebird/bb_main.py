@@ -244,7 +244,7 @@ if __name__ == "__main__":
     print "running account:"
     print cfg.own_twittername
 
-    hdlr_1 = logging.handlers.RotatingFileHandler("../accounts/%s/bluebird.log"%cfg.own_twittername, maxBytes=20000000, backupCount=1)
+    hdlr_1 = logging.handlers.RotatingFileHandler("../accounts/%s/bluebird.log"%cfg.own_twittername, maxBytes=20000000, backupCount=5)
     hdlr_1.setFormatter(formatter)
     logr.setLevel(logging.INFO)
     logr.addHandler(hdlr_1)

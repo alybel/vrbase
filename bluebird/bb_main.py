@@ -198,7 +198,7 @@ class FavListener(tweepy.StreamListener):
                         return True
                     #Introduce some randomness such that not everything is automatically posted
                     if text and random.random() < cfg.status_update_prob:
-                        bbl.update_status(text = text, api = self.api)
+                        bbl.update_status(text = text, api = self.api, score = score)
         #Manage Retweetssour
         if score >= cfg.retweet_score:
             if self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):

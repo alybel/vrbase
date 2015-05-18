@@ -309,7 +309,7 @@ class BuildText(object):
             print "generic text:", text
         return text
 
-def update_status(text, api):
+def update_status(text, api, score):
     if len(text) > 135:
         if cfg.verbose: print "Text Too Long!"
         return None
@@ -317,7 +317,7 @@ def update_status(text, api):
         status = api.update_status(text)
     except tweepy.error.TweepError, e:
         logr.error("in function bblib:update_status;%s"%e)
-    logr.info("$$StatusUpdate;%s"%(text))
+    logr.info("$$StatusUpdate;%d;%s"%(score,text))
     return
 
 def retweet(id, api):

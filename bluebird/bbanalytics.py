@@ -15,17 +15,28 @@ forbidden_keywords = []
 
 #Make config file available in this module
 def set_cfg(cfgobj=None):
+    """
+    :param cfgobj (object):
+    :return: None
+    """
     global cfg
     cfg = cfgobj
+    if cfg:
+        "Config Loaded"
+        return True
+    else:
+        "config not loaded"
+        return False
 
 
 def initialize():
     global languages, locations, negative_keywords, forbidden_keywords, keywords
     languages = cfg.languages if cfg.languages != [] else None
     locations = cfg.locations if cfg.locations != [] else None
-    keywords = manage_keywords(cfg.keywords)
+    keywords = manage_keywords2(cfg.keywords)
     negative_keywords = cfg.negative_keywords
     forbidden_keywords = cfg.forbidden_keywords
+    print keywords
 
 
 def manage_keywords(d):
@@ -45,6 +56,13 @@ def manage_keywords(d):
             d["".join(kv)] = d[key]
     return d
 
+def manage_keywords2(d):
+    "remove all whitespaces from keywords"
+    keylist = d.keys()
+    for key in keylist:
+        if " " in key:
+            d[key.replace(" ","")] = d.pop(key)
+    return d
 
 def generic_filter(entity, compare_list):
     if not compare_list:
@@ -97,10 +115,10 @@ def split_and_clean_text(t = ""):
     #remove plural s
     t = [x.rstrip("s") for x in t if len(x) > 2]
     #Uniquifiy the list of words
-    #buld tuples of 2 words
-    tstar = [t[i] + " " + t[i+1] for i,x in enumerate(t) if i < len(t)-1]    
-    t.extend(tstar)
-    return list(set(t))
+    #bild tuples of 2 words
+    #tstar = [t[i] + " " + t[i+1] for i,x in enumerate(t) if i < len(t)-1]
+    #t.extend(tstar)
+    return t
 
 
 def number_hashtags(t):
@@ -111,18 +129,44 @@ def number_hashtags(t):
     return count
 
 
-def score_tweets(t="", verbose = False):
-    """
-    input cleaned_text
-    scan description for list of keywords as set in the config file. If any keyword matches, return True.
-    The function will not return True on "data science" and "datascience"
-    """
-    q = t
-    t = split_and_clean_text(t)
+def eval_tweet(t):
     score = 0
     for word in t:
         if word in keywords:
             score += keywords[word]
+
+
+def eval_tweet2(t):
+    """
+    calculate the whitelist-part score of a tweet. check the combination of one word plus its subsequent
+    word if it matches a keyword. So, : "data science" will match "datascience"
+    :param t:
+    :return: score
+    """
+    score = 0
+    for i, word in enumerate(t):
+        if word in keywords:
+            score += keywords[word]
+        else:
+            if i == len(t)-1: continue
+            #build the combination of a word plus the subsequent word
+            comb = word+t[i+1]
+            if comb in keywords:
+                score += keywords[comb]
+    return score
+
+def score_tweets(t="", verbose = False):
+    """
+    input the tweet
+    :param: t
+    :returns score (int)
+    """
+    q = t
+    t = split_and_clean_text(t)
+    print t
+    score = eval_tweet2(t)
+
+    for word in t:
         if word in negative_keywords:
             score -= 10
         #Loop over forbidden keywords and check if forbidden word in word from text. This covers also cases like "microsoft's"

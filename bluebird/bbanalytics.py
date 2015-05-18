@@ -57,7 +57,12 @@ def manage_keywords(d):
     return d
 
 def manage_keywords2(d):
-    "remove all whitespaces from keywords"
+    """
+    remove all whitespaces from keywords. do not split and double-store keywords with blanks.
+    :param d:
+    return d
+    """
+
     keylist = d.keys()
     for key in keylist:
         if " " in key:
@@ -130,6 +135,7 @@ def number_hashtags(t):
 
 
 def eval_tweet(t):
+    #simple check for words in dict and attach their weights
     score = 0
     for word in t:
         if word in keywords:
@@ -144,15 +150,20 @@ def eval_tweet2(t):
     :return: score
     """
     score = 0
+    used_words = []
     for i, word in enumerate(t):
+        if word in used_words: continue
         if word in keywords:
             score += keywords[word]
+            used_words.append(word)
         else:
             if i == len(t)-1: continue
             #build the combination of a word plus the subsequent word
             comb = word+t[i+1]
+            if comb in used_words: continue
             if comb in keywords:
                 score += keywords[comb]
+                used_words.append(comb)
     return score
 
 def score_tweets(t="", verbose = False):
@@ -163,9 +174,7 @@ def score_tweets(t="", verbose = False):
     """
     q = t
     t = split_and_clean_text(t)
-    print t
     score = eval_tweet2(t)
-
     for word in t:
         if word in negative_keywords:
             score -= 10

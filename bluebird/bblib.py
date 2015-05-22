@@ -294,6 +294,7 @@ class BuildText(object):
         if not text or len(text.split(" ")) < 3:
             return None
         #add hashtags until tweet length is full
+        score = bbanalytics.score_tweets(text)
         help_hashtags = []
         for i in xrange(3):
             old_text = "%s"%text
@@ -307,7 +308,7 @@ class BuildText(object):
                 break
         if cfg.verbose:
             print "generic text:", text
-        return text
+        return text, score
 
 def update_status(text, api, score):
     if len(text) > 135:

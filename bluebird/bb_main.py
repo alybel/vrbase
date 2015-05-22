@@ -191,7 +191,11 @@ class FavListener(tweepy.StreamListener):
         if score >= cfg.status_update_score:
             url = bba.extract_url_from_tweet(t.text)
             if url:
-                text = TextBuilder.build_text(url)
+                #return text and score from generated text
+                text, score2 = TextBuilder.build_text(url)
+                #check if score2 also fulfills the score criteria
+                if score2 < cfg.status_update_score():
+                    return True
                 #in case the text retrieved from the headline contains negative or forbidden keywords, don't send the update
                 if text: #in some cases, text may be None.
                     if bba.score_tweets(text, verbose = verbose) < cfg.status_update_score:

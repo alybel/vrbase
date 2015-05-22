@@ -288,11 +288,11 @@ class BuildText(object):
         #build first part of text
         title = self.get_title_from_website(url)
         if not title:
-            return None
+            return None, 0
         text = "%s %s"%(title, url)
         #Title must exist an consist of at least 4 words
         if not text or len(text.split(" ")) < 3:
-            return None
+            return None, 0
         #add hashtags until tweet length is full
         score = bbanalytics.score_tweets(text)
         help_hashtags = []

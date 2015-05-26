@@ -8,6 +8,7 @@ import traceback
 import random
 import argparse
 import httplib
+import collections
 
 import tweepy
 
@@ -20,6 +21,15 @@ hdlr_1 = None
 TextBuilder = None
 
 recent_follows = []
+
+class ManageUpdatesPerDay(object):
+    def __init__(self, max_updates):
+        self.max_updates = max_updates
+        self.no_updates = collections.defaultdict(int)
+    def max_reached(self):
+        return self.no_updates[bbl.get_today()] >= self.max_updates
+    def add_update(self):
+        self.no_updates[bbl.get_today()] += 1
 
 def lp(s):
     """print this line if verbose is true """
@@ -202,7 +212,11 @@ class FavListener(tweepy.StreamListener):
                         return True
                     #Introduce some randomness such that not everything is automatically posted
                     if text and random.random() < cfg.status_update_prob:
-                        bbl.update_status(text = text, api = self.api, score = score)
+                        if not ManageUpdatesPerDay.max_reached():
+                            bbl.update_status(text = text, api = self.api, score = score)
+                            ManageUpdatesPerDay.add_update()
+                        else:
+                            logr.info("$$MaxStatusUpdate;%d;%s"%(score, text))
                     elif text:
                         logr.info("$$MissedStatusUpdate;%d;%s"%(score, text))
         #Manage Retweetssour
@@ -264,7 +278,7 @@ if __name__ == "__main__":
     import bbanalytics as bba
     bba.set_cfg(cfg)
     bba.initialize()
-
+    ManageUpdatesPerDay = ManageUpdatesPerDay(cfg.max_updates_per_day)
     TextBuilder = bbl.BuildText(preambles = cfg.preambles, hashtags = cfg.hashtags)
 
     auth, api = bbl.connect_app_to_twitter()

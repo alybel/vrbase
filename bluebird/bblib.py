@@ -19,6 +19,7 @@ cfg = None
 def set_cfg(cfgobj = None):
     global cfg
     cfg = cfgobj
+    print cfg.access_token
 
 def initialize():
     glob_today = str(datetime.date.today())
@@ -453,6 +454,11 @@ def get_friends_ids(api, user = None):
     #ToDo: in friends_ids needs to be implemented to receive more than 5000 ids
     #friends ids come sorted from freshly added to old.
     return user.friends_ids()
+
+
+def get_user_info(api = None, id = 0):
+    user = api.get_user(id)
+    return user
 
 def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
     me = api.me()

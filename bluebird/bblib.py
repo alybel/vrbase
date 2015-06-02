@@ -355,8 +355,11 @@ def in_time():
     if cfg.verbose: print "Request not in allowed time"
     return False
 
-def follow_gate_open():  
-    today = str(datetime.date.today())
+def get_today():
+    return str(datetime.date.today())
+
+def follow_gate_open():
+    today = get_today()
     ex_today = executed_number_follows_per_day[today]
     if ex_today >= max_no_followers_per_day:
         print today,"executed number of follows", ex_today
@@ -442,6 +445,12 @@ def get_statuses(api, username = None):
             break
     print len(tl)
     return tl
+
+
+def get_info_from_account_id(api = None, id = 0):
+    user = api.get_user(id)
+    return user
+
 
 def get_friends_ids(api, user = None):
     """

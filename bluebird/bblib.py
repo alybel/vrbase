@@ -445,6 +445,12 @@ def get_statuses(api, username = None):
     print len(tl)
     return tl
 
+
+def get_info_from_account_id(api = None, id = 0):
+    user = api.get_user(id)
+    return user
+
+
 def get_friends_ids(api, user = None):
     """
     :param api: twitter api object

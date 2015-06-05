@@ -12,6 +12,7 @@ import sys
 import os.path
 import random
 import lxml.html
+import pymongo
 
 
 #Make config file available in this module
@@ -43,6 +44,8 @@ def parse_number_follows_from_logfile():
             if today in line and "follower_level_reached" in line:
                 return 5000
     return today_follow_counts
+
+
 
 
 class CyclicArray(object):
@@ -460,14 +463,57 @@ def get_friends_ids(api, user = None):
     """
     if not user:
         user = api.me()
-    #ToDo: in friends_ids needs to be implemented to receive more than 5000 ids
-    #friends ids come sorted from freshly added to old.
+
+    # ToDo: in friends_ids needs to be implemented to receive more than 5000 ids
+    # friends ids come sorted from freshly added to old.
+
     return user.friends_ids()
 
+class UpdateUserInfo(object):
+    def __init__(self, api):
+        #If this is not run from the berlin server, a ssh tunnel must be established first
+        client = pymongo.MongoClient("mongodb://localhost:27017")
+        self.db = client.friends
+        self.api = api
 
-def get_user_info(api = None, id = 0):
-    user = api.get_user(id)
-    return user
+    def id_exists_in_userdb(self, update_id):
+        """
+        Check if a certain Tweet_ID exists in the user-database
+        :rtype : bool
+        :param update_id: int
+        :return: if user exists in database
+        """
+        return bool(self.db.user.find({"_id": update_id}).count())
+
+    def update_info_in_mongodb(self, info):
+        #set a propoer _id variable for mongodb that corresponds with the Twitter user_id
+        info._json["_id"] = info.id
+        try:
+            self.db.user.update_one(
+                {"_id": info.id},
+                {
+                "$set":info._json,
+                "$currentDate": {"lastModified": True}
+                },
+                upsert = True)
+            print "updated", info.id
+        except Exception, e:
+            logr.error("in function update_info_in_mongodb; %s" % e)
+
+    def update_user_info(self,n = 10):
+        """
+        update the user info to the database
+        :param api: API
+        :param n: Number of users to be updated
+        """
+        ids = get_friends_ids(self.api)
+        for user_id in random.sample(ids, n):
+            info = self.get_user_info(user_id)
+            self.update_info_in_mongodb(info)
+
+    def get_user_info(self, id = 0):
+        info = get_info_from_account_id(api=self.api, id= id)
+        return info
 
 def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
     me = api.me()

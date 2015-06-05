@@ -470,11 +470,12 @@ def get_friends_ids(api, user = None):
     return user.friends_ids()
 
 class UpdateUserInfo(object):
-    def __init__(self, api):
+    def __init__(self, api, account_name):
         #If this is not run from the berlin server, a ssh tunnel must be established first
         client = pymongo.MongoClient("mongodb://localhost:27017")
         self.db = client.friends
         self.api = api
+        self.account_name = account_name
 
     def id_exists_in_userdb(self, update_id):
         """
@@ -483,13 +484,13 @@ class UpdateUserInfo(object):
         :param update_id: int
         :return: if user exists in database
         """
-        return bool(self.db.user.find({"_id": update_id}).count())
+        return bool(self.db[self.account_name].find({"_id": update_id}).count())
 
     def update_info_in_mongodb(self, info):
         #set a propoer _id variable for mongodb that corresponds with the Twitter user_id
         info._json["_id"] = info.id
         try:
-            self.db.user.update_one(
+            self.db[self.account_name].update_one(
                 {"_id": info.id},
                 {
                 "$set":info._json,
@@ -613,9 +614,10 @@ def test_stream():
         except Exception, e:
             print e
             pass
-    
+
 if __name__ == '__main__':
     from pprint import pprint
     #connect_app_to_twitter()
     #test_stream()
-    get_recent_follows()
+    #get_recent_follows()
+

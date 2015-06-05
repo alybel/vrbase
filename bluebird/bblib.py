@@ -17,10 +17,10 @@ import pymongo
 
 #Make config file available in this module
 cfg = None
+
 def set_cfg(cfgobj = None):
-    global cfg
+    global cfg, updateuserinf
     cfg = cfgobj
-    print cfg.access_token
 
 def initialize():
     glob_today = str(datetime.date.today())

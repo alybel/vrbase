@@ -218,6 +218,7 @@ class FavListener(tweepy.StreamListener):
                         else:
                             logr.info("$$MaxStatusUpdate;%d;%s"%(score, text))
                     elif text:
+                        update_user_info.update_user_info(10)
                         logr.info("$$MissedStatusUpdate;%d;%s"%(score, text))
         #Manage Retweetssour
         if score >= cfg.retweet_score:
@@ -280,8 +281,8 @@ if __name__ == "__main__":
     bba.initialize()
     ManageUpdatesPerDay = ManageUpdatesPerDay(cfg.max_updates_per_day)
     TextBuilder = bbl.BuildText(preambles = cfg.preambles, hashtags = cfg.hashtags)
-
     auth, api = bbl.connect_app_to_twitter()
+    update_user_info = bbl.UpdateUserInfo(api = api, account_name = cfg.own_twittername)
     l = FavListener(api)
     stream = bbl.tweepy.Stream(auth, l)
     logr.info("EngineStarted")

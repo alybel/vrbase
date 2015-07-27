@@ -455,6 +455,38 @@ def get_info_from_account_id(api = None, id = 0):
     return user
 
 
+def get_all_friends(api, username = None):
+    """
+    important note: this method only returns statuses but not retweets
+    :param api: twitter api
+    :param username: own twittername or given screen_name
+    :return: list of statuses
+    """
+    if not username: username = cfg.own_twittername
+    tl = api.friends_ids(screen_name = username, count = 200)
+    if len(tl) > 0 :
+        max_id = tl[-1].id
+    else:
+        return []
+    print len(tl)
+    while True:
+        tlx = api.friends_ids(screen_name = username, count = 200, max_id = max_id)
+        if len(tlx)>1:
+            tl.extend(tlx)
+            if len(tl) > 0:
+                max_id = tl[-1].id
+                print max_id
+            else:
+                break
+        else:
+            break
+    print len(tl)
+    return tl
+
+
+
+
+
 def get_friends_ids(api, user = None):
     """
     :param api: twitter api object

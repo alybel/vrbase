@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#this shebang uses the python that is currently activated
 import glob
 import subprocess
 import os

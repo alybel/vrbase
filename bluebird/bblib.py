@@ -17,10 +17,14 @@ import pymongo
 
 #Make config file available in this module
 cfg = None
+class session:pass
 
 def set_cfg(cfgobj = None):
     global cfg, updateuserinf
     cfg = cfgobj
+
+def set_api(api = None):
+    session.api = api
 
 def initialize():
     glob_today = str(datetime.date.today())
@@ -30,9 +34,10 @@ def initialize():
 #verbose2 for all data that flows in
 verbose2 = False
 
-max_no_followers_per_day = 992
+
 logr = logging.getLogger("logger")
 executed_number_follows_per_day = collections.defaultdict(int)
+max_number_follows_per_day = collections.defaultdict(int)
 
 def parse_number_follows_from_logfile():
     today = str(datetime.date.today())
@@ -44,8 +49,6 @@ def parse_number_follows_from_logfile():
             if today in line and "follower_level_reached" in line:
                 return 5000
     return today_follow_counts
-
-
 
 
 class CyclicArray(object):
@@ -361,10 +364,17 @@ def in_time():
 def get_today():
     return str(datetime.date.today())
 
+
+def update_max_followers_today(today):
+    max_number_follows_per_day[today] = min(992, max(195, get_info_from_account_id(session.api, cfg.own_twittername).followers_count))
+    logr.info('set max_number_follows_to%d'%max_number_follows_per_day[today])
+
 def follow_gate_open():
     today = get_today()
     ex_today = executed_number_follows_per_day[today]
-    if ex_today >= max_no_followers_per_day:
+    if today not in max_number_follows_per_day:
+        update_max_followers_today(today)
+    if ex_today >= max_number_follows_per_day[today]:
         print today,"executed number of follows", ex_today
         logr.info("NumberFollowersExceeded")
         return False
@@ -372,6 +382,7 @@ def follow_gate_open():
         logr.info("time not accepted")
         return False
     return True
+
 
 def add_as_follower(t, api, verbose = False):
     today = str(datetime.date.today())

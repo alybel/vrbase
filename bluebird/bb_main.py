@@ -24,6 +24,7 @@ TextBuilder = None
 recent_follows = []
 
 
+
 class ManageUpdatesPerDay(object):
     def __init__(self, max_updates, use_timer=False):
         self.max_updates = max_updates
@@ -305,6 +306,7 @@ if __name__ == "__main__":
     # not called to oftern
     TextBuilder = bbl.BuildText(preambles=cfg.preambles, hashtags=cfg.hashtags)
     auth, api = bbl.connect_app_to_twitter()
+    bbl.set_api(api)
     update_user_info = bbl.UpdateUserInfo(api=api, account_name=cfg.own_twittername)
     l = FavListener(api)
     stream = bbl.tweepy.Stream(auth, l)

@@ -301,7 +301,7 @@ if __name__ == "__main__":
 
     bba.set_cfg(cfg)
     bba.initialize()
-    ManageUpdatesPerDay = ManageUpdatesPerDay(cfg.max_updates_per_day, use_timer=True)
+    ManageUpdatesPerDay = ManageUpdatesPerDay(cfg.max_updates_per_day, use_timer=False)
     # TODO below object not yet in use. Find proper use of it in a place where it
     # not called to oftern
     TextBuilder = bbl.BuildText(preambles=cfg.preambles, hashtags=cfg.hashtags)

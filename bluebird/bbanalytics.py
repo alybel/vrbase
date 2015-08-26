@@ -149,6 +149,8 @@ def eval_tweet2(t):
     :param t:
     :return: score
     """
+    if not keywords:
+        raise ValueError('keywords list empty. is the config file properly loaded?')
     score = 0
     used_words = []
     for i, word in enumerate(t):
@@ -168,8 +170,9 @@ def eval_tweet2(t):
 
 def score_tweets(t="", verbose = False):
     """
-    input the tweet
-    :param: t
+    input the tweet text and receive a score
+    :param: tweet text
+    :type: string
     :returns score (int)
     """
     q = t
@@ -178,6 +181,7 @@ def score_tweets(t="", verbose = False):
     for word in t:
         if word in negative_keywords:
             score -= 10
+            if verbose: print 'negative word',word
         #Loop over forbidden keywords and check if forbidden word in word from text. This covers also cases like "microsoft's"
         for check_word in forbidden_keywords:
             if check_word in word:

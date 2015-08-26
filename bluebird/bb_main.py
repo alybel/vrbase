@@ -236,9 +236,9 @@ class FavListener(tweepy.StreamListener):
                             bbl.update_status(text=text, api=self.api, score=score)
                             ManageUpdatesPerDay.add_update()
                         else:
-                            logr.info("$$MaxStatusUpdate;%d;%s" % (score, text))
+                            logr.info("$$MaxStatusUpdateMaxPerDayReached;%d;%s" % (score, text))
                     elif text:
-                        logr.info("$$MissedStatusUpdate;%d;%s" % (score, text))
+                        logr.info("$$MissedStatusUpdateRejectedByRandom;%d;%s" % (score, text))
         # Manage Retweetssour
         if score >= cfg.retweet_score:
             if self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):

@@ -11,6 +11,7 @@ import argparse
 import httplib
 import collections
 import time
+import numpy.random as nr
 
 import tweepy
 
@@ -39,10 +40,16 @@ class ManageUpdatesPerDay(object):
             return self.no_updates[bbl.get_today()] >= self.max_updates or time.time() < self.timer[bbl.get_today()]
 
     def add_update(self):
+        self.clean_dict(self.no_updates)
+        self.clean_dict(self.timer)
         self.no_updates[bbl.get_today()] += 1
         if self.use_timer:
-            self.timer[bbl.get_today()] = time.time() + \
-                                          random.normalvariate(mu=1, sigma=3) * 24 * 60 * 60. / self.max_updates
+            self.timer[bbl.get_today()] = time.time() + min(nr.exponential(24*60*60./self.max_updates), 2*60*60)
+
+    def clean_dict(self, d):
+        for key in d:
+            if not key == bbl.get_today():
+                del d[key]
 
 
 def lp(s):
@@ -301,7 +308,7 @@ if __name__ == "__main__":
 
     bba.set_cfg(cfg)
     bba.initialize()
-    ManageUpdatesPerDay = ManageUpdatesPerDay(cfg.max_updates_per_day, use_timer=False)
+    ManageUpdatesPerDay = ManageUpdatesPerDay(cfg.max_updates_per_day, use_timer=True)
     # TODO below object not yet in use. Find proper use of it in a place where it
     # not called to oftern
     TextBuilder = bbl.BuildText(preambles=cfg.preambles, hashtags=cfg.hashtags)

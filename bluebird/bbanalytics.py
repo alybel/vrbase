@@ -9,8 +9,7 @@ cfg = None
 languages = []
 locations = []
 keywords = []
-negative_keywords = []
-forbidden_keywords = []
+blacklist = {}
 
 
 #Make config file available in this module
@@ -30,12 +29,11 @@ def set_cfg(cfgobj=None):
 
 
 def initialize():
-    global languages, locations, negative_keywords, forbidden_keywords, keywords
+    global languages, locations, keywords, blacklist
     languages = cfg.languages if cfg.languages != [] else None
     locations = cfg.locations if cfg.locations != [] else None
     keywords = manage_keywords2(cfg.keywords)
-    negative_keywords = cfg.negative_keywords
-    forbidden_keywords = cfg.forbidden_keywords
+    blacklist = cfg.blacklist
     print keywords
 
 
@@ -179,13 +177,9 @@ def score_tweets(t="", verbose = False):
     t = split_and_clean_text(t)
     score = eval_tweet2(t)
     for word in t:
-        if word in negative_keywords:
-            score -= 10
+        if word in blacklist:
+            score -= blacklist[word]
             if verbose: print 'negative word',word
-        #Loop over forbidden keywords and check if forbidden word in word from text. This covers also cases like "microsoft's"
-        for check_word in forbidden_keywords:
-            if check_word in word:
-                score -= 1000
     if score >=0 and verbose:
         logr.info("TestTweet;%d;%s:%s"%(score,q,t))
         print score

@@ -280,12 +280,14 @@ if __name__ == "__main__":
     account_path = "../accounts/%s/" % args.location
     print account_path
     sys.path.append(account_path)
+    import load_config
     try:
-        import config as cfg
+        #import config as cfg
+        cfg = load_config.load_config(args.location)
     except ImportError:
         print "Account %s does not exist" % args.location
         sys.exit(0)
-
+    print cfg.keywords
     if cfg.own_twittername != args.location:
         print "serious error in starting: Twittername not same as account folder name!"
     print "running account:"

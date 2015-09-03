@@ -368,15 +368,18 @@ def get_today():
 def update_max_followers_today(today):
     max_number_follows_per_day[today] = min(992, max(195, get_info_from_account_id(session.api, cfg.own_twittername).followers_count))
     logr.info('set max_number_follows_to%d'%max_number_follows_per_day[today])
+    #ToDO drop all other dates to avoid memory leaks:
+
 
 def follow_gate_open():
     today = get_today()
     ex_today = executed_number_follows_per_day[today]
     if today not in max_number_follows_per_day:
+        logr.info("$$set_number_followers_for_today")
         update_max_followers_today(today)
     if ex_today >= max_number_follows_per_day[today]:
         print today,"executed number of follows", ex_today
-        logr.info("NumberFollowersExceeded")
+        logr.info("$$max_no_follows_reached")
         return False
     if not in_time():
         logr.info("time not accepted")

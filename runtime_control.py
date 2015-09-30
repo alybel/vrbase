@@ -3,25 +3,37 @@ __author__ = 'alex'
 from sqlalchemy import schema, types, create_engine, orm
 import datetime
 import time
+import sys
+
 connection_string = 'mysql+pymysql://alex:1ba12D1Kg84@62.75.156.31:3306/onboarding'
 eng = create_engine(connection_string)
 states = {}
 md = schema.MetaData(bind=eng, reflect=True)
 Session = orm.sessionmaker(bind=eng, autoflush=True, autocommit=False,
-                               expire_on_commit=True)
+                           expire_on_commit=True)
 s = Session()
 gs = md.tables['GeneralSettings']
 
 # Account Control Functions
 
+def pr(str=''):
+    print datetime.datetime.now(), str
+
+
 def start_account(account):
+    pr('start account %s' % account['twittername'])
     pass
+
 
 def stop_account(account):
+    pr('stop account %s' % account['twittername'])
     pass
 
+
 def restart_account(account):
+    pr('restart account %s' % account['twittername'])
     pass
+
 
 def result_to_accounts(result):
     accounts = {}
@@ -35,44 +47,53 @@ def result_to_accounts(result):
         }
     return accounts
 
+
 def pull_data():
     result = s.query(gs.c.own_twittername, gs.c.onoff, gs.c.restart_needed, gs.c.paused_until).all()
     accounts = result_to_accounts(result)
     return accounts
+
 
 def is_paused(account):
     if datetime.date.today() < account['paused_until'].date():
         return True
     return False
 
+
 def check_if_off_or_switch_off(account):
     # ToDo check is still needed
     stop_account(account)
     pass
+
 
 def is_set_on(account):
     if account['onoff'] == 1:
         return True
     return False
 
+
 def is_set_to_restart(account):
     if account['restart_needed'] == 1:
         return True
     return False
 
+
 def update_states(account):
     states[account['twittername']] = account['onoff']
+
 
 def state_changed(account):
     if states[account['twittername']] != account['onoff']:
         return True
     return False
 
+
 def put_state_in_action(account):
     if account['onoff'] == 1:
         start_account(account)
     else:
         stop_account(account)
+
 
 while True:
     accounts = pull_data()
@@ -93,5 +114,7 @@ while True:
         # Case 4: State has changed, apply change.
         if state_changed(account):
             put_state_in_action(account)
-        print 'heartbeat'
-        time.sleep(2)
+            update_states(account)
+        pr('heartbeat')
+        sys.stdout.flush()
+        time.sleep(10)

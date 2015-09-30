@@ -1,5 +1,4 @@
 __author__ = 'alex'
-
 from sqlalchemy import schema, types, create_engine, orm
 import datetime
 import time

@@ -51,6 +51,7 @@ def pull_data():
     s = Session()
     result = s.query(gs.c.own_twittername, gs.c.onoff, gs.c.restart_needed, gs.c.paused_until).all()
     accounts = result_to_accounts(result)
+    s.close()
     return accounts
 
 

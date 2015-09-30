@@ -115,6 +115,6 @@ while True:
         if state_changed(account):
             put_state_in_action(account)
             update_states(account)
-        pr('heartbeat')
-        sys.stdout.flush()
+    pr('heartbeat')
+    sys.stdout.flush()
     time.sleep(10)

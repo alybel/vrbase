@@ -1,8 +1,8 @@
 __author__ = 'alex'
-
 from sqlalchemy import schema, types, create_engine, orm
 import datetime
 import time
+import sys
 connection_string = 'mysql+pymysql://alex:1ba12D1Kg84@62.75.156.31:3306/onboarding'
 eng = create_engine(connection_string)
 states = {}
@@ -94,4 +94,5 @@ while True:
         if state_changed(account):
             put_state_in_action(account)
         print 'heartbeat'
-        time.sleep(2)
+        sys.stdout.flush()
+        time.sleep(10)

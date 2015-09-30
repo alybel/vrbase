@@ -48,6 +48,7 @@ def result_to_accounts(result):
 
 
 def pull_data():
+    s = Session()
     result = s.query(gs.c.own_twittername, gs.c.onoff, gs.c.restart_needed, gs.c.paused_until).all()
     accounts = result_to_accounts(result)
     return accounts
@@ -112,9 +113,8 @@ while True:
             restart_account(account)
         # Case 4: State has changed, apply change.
         if state_changed(account):
-            print 'state changed for', account['twittername']
             put_state_in_action(account)
             update_states(account)
-    #pr('heartbeat')
+    pr('heartbeat')
     sys.stdout.flush()
-    time.sleep(2)
+    time.sleep(10)

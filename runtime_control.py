@@ -113,8 +113,9 @@ while True:
             restart_account(account)
         # Case 4: State has changed, apply change.
         if state_changed(account):
+            print 'state changed for', account['twittername']
             put_state_in_action(account)
             update_states(account)
-    pr('heartbeat')
+    #pr('heartbeat')
     sys.stdout.flush()
-    time.sleep(10)
+    time.sleep(2)

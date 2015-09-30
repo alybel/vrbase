@@ -79,6 +79,13 @@ def is_set_to_restart(account):
     return False
 
 
+def reset_restart_needed(account):
+    session = Session()
+    a = session.query('GeneralSettings').filter_by(own_twittername=account['twittername']).first()
+    print a
+    pass
+
+
 def update_states(account):
     states[account['twittername']] = account['onoff']
 
@@ -99,6 +106,7 @@ def put_state_in_action(account):
 while True:
     accounts = pull_data()
     for account_name in accounts:
+        reset_restart_needed(account)
         account = accounts[account_name]
         # Case 1: Account is put on pause. There are no exceptions to this. Check if account is paused otherwise
         # pause it.
@@ -112,6 +120,7 @@ while True:
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(account) and is_set_to_restart(account):
             restart_account(account)
+            reset_restart_needed(account)
         # Case 4: State has changed, apply change.
         if state_changed(account):
             put_state_in_action(account)

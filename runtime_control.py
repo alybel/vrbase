@@ -10,7 +10,7 @@ states = {}
 md = schema.MetaData(bind=eng, reflect=True)
 Session = orm.sessionmaker(bind=eng, autoflush=True, autocommit=False,
                            expire_on_commit=True)
-s = Session()
+
 gs = md.tables['GeneralSettings']
 
 # Account Control Functions

@@ -282,8 +282,9 @@ if __name__ == "__main__":
     sys.path.append(account_path)
     import load_config
     try:
-        #import config as cfg
-        cfg = load_config.load_config(args.location)
+        # Here, decide if you want to use the config from file or load from database
+        import config as cfg
+        #cfg = load_config.load_config(args.location)
     except ImportError:
         print "Account %s does not exist" % args.location
         sys.exit(0)

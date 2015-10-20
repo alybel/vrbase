@@ -2,9 +2,11 @@ import glob
 import vr_main
 import time
 import smtplib
+import datetime
+import sys
 
 def account_name_from_path(path = ""):
-    return path.split("/")[1].split(".")[0]
+    return path.split("/")[-1].split(".")[0]
 
 def err_exception(line = ""):
     """
@@ -18,7 +20,7 @@ def err_exception(line = ""):
         return True
 
 def run_monitoring():
-    fl = glob.glob("stdout/*.out")
+    fl = glob.glob("/home/vr/valureach_ops/stdout/*.out")
     for fn in fl:
         with open(fn, "r") as f:
             for line in f:
@@ -30,7 +32,7 @@ def run_monitoring():
                     result = vr_main.stop_account(account_name, auto_call = True)
                     if result:
                         send_report(account_name)
-                        with open("monitoring_logfile.txt","a") as logfile:
+                        with open("/home/vr/logs/monitoring_logfile.txt","a") as logfile:
                             logfile.write("%s;%s;%s \n" % (str(time.ctime(time.time())), "accountkilled", account_name))
 
 
@@ -38,22 +40,22 @@ def run_monitoring():
 
 def send_report(account_name):
     return 
-    sender = "a.beck@valureach.com"
-    receivers = ["a.beck@valureach.com"]
+    sender = "support@valureach.com"
+    receivers = ["valureach@gmail.com"]
 
     message = """From: Valureach Warning System
-To: Alexander Beck
-Subject: Account killed: %s
+    To: Alexander Beck
+    Subject: Account killed: %s
 
-empty
+    empty
 
-""" % account_name
+    """ % account_name
 
     try:
         smtpObj = smtplib.SMTP('smtp.valureach.com', 25)
         smtpObj.sendmail(sender, receivers, message)
     except SMTPException:
-        pass
+        logfile.write('email could not be sent')
 
 
 
@@ -61,4 +63,6 @@ if __name__ == "__main__":
     while True:
         time.sleep(10)
         run_monitoring()
+        print 'heartbeat', datetime.datetime.now()
+        sys.stdout.flush()
 

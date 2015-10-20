@@ -214,7 +214,9 @@ class FavListener(tweepy.StreamListener):
             return True
         if "dump_read" in vars(cfg):
             if cfg.dump_read == True:
-                logr.info("$$DUMP", t.text, t.user_screen_name, t.description, t.created, t.id)
+#                logr.info("$$DUMP", t.text, t.user_screen_name, t.description, t.created, t.id)
+                with open('/home/vr/dumps/feed.txt', 'a+') as f:
+                    f.write(data)
         # add score if tweet is relevant
         score = bba.score_tweets(t.text, verbose=verbose)
         # Manage Favorites
@@ -337,4 +339,5 @@ if __name__ == "__main__":
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
             time.sleep(2)
-            pass
+            # ToDo remove the below line to guarantee ongoing operations
+            sys.exit()

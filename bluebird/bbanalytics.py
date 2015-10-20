@@ -33,8 +33,16 @@ def initialize():
     languages = cfg.languages if cfg.languages != [] else None
     locations = cfg.locations if cfg.locations != [] else None
     keywords = manage_keywords2(cfg.keywords)
-    blacklist = cfg.blacklist
+    try:
+        #Blacklist must be a Dictonary
+        blacklist = cfg.blacklist
+    except:
+        # If loaded from file, use the two lists and combine them 
+        cfg.negative_keywords.extend(cfg.forbidden_keywords)
+        for el in cfg.negative_keywords:
+            blacklist[el] = 1000
     print keywords
+    print blacklist
 
 
 def manage_keywords(d):

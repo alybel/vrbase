@@ -415,7 +415,16 @@ def add_as_follower(t, api, verbose = False):
             print "Follower level reached this should not happen. Function: add_as_follower in bblib.py"
             executed_number_follows_per_day[today] = max_no_followers_per_day
             time.sleep(360)
+        if error_code == 89 or 'expired token' in e:
+            logr.error('critical: new token required! access apps.twitter.com')
+            print 'error'
+            sys.exit()
+        if error_code == 401:
+            logr.error('critical: app unauthorized! access apps.twitter.com')
+            print 'error'
+            sys.exit()
         logr.error("in function add_as_follower;%s"%e)
+        sys.exit()
         
 def remove_follow(screen_name, api):
     if str(screen_name).isdigit():

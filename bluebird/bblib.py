@@ -1,4 +1,4 @@
-#Basic functionality used for the bluebird project"
+# Basic functionality used for the bluebird project"
 import tweepy
 import json
 import bbanalytics
@@ -7,7 +7,7 @@ import pickle
 import os.path
 import datetime
 import time
-import collections 
+import collections
 import sys
 import os.path
 import random
@@ -15,33 +15,40 @@ import lxml.html
 import pymongo
 
 
-#Make config file available in this module
+# Make config file available in this module
 cfg = None
-class session:pass
 
-def set_cfg(cfgobj = None):
-    global cfg, updateuserinf
+
+class Session:
+    pass
+
+
+def set_cfg(cfgobj=None):
+    global cfg
     cfg = cfgobj
 
-def set_api(api = None):
-    session.api = api
+
+def set_api(api=None):
+    Session.api = api
+
 
 def initialize():
     glob_today = str(datetime.date.today())
     executed_number_follows_per_day[glob_today] = parse_number_follows_from_logfile()
     print "already added number of users today:", executed_number_follows_per_day[glob_today]
 
-#verbose2 for all data that flows in
-verbose2 = False
 
+# verbose2 for all data that flows in
+verbose2 = False
 
 logr = logging.getLogger("logger")
 executed_number_follows_per_day = collections.defaultdict(int)
 max_number_follows_per_day = collections.defaultdict(int)
 
+
 def parse_number_follows_from_logfile():
     today = str(datetime.date.today())
-    with open("../accounts/%s/bluebird.log"%cfg.own_twittername, "r") as f:
+    with open("../accounts/%s/bluebird.log" % cfg.own_twittername, "r") as f:
         today_follow_counts = 0
         for line in f:
             if today in line and "followinguser" in line:
@@ -52,14 +59,16 @@ def parse_number_follows_from_logfile():
 
 
 class CyclicArray(object):
-    def __init__(self, len = 0):
-        self.l = len*[None]
+    def __init__(self, length=0):
+        self.l = length * [None]
         self.count = 0
-        self.array_length = len
+        self.array_length = length
         self.add_lock = False
         self.inc_lock = False
 
-    def load_with_array(self, arr = []):
+    def load_with_array(self, arr=None):
+        if not arr:
+            arr = []
         arr_len = len(arr)
         if arr_len > self.array_length:
             raise Exception("in class CyclicArray function load_with_array: array to load is too long.")
@@ -70,14 +79,14 @@ class CyclicArray(object):
 
     def reset(self):
         self.count = 0
-        self.l = self.array_length*[None]
+        self.l = self.array_length * [None]
         self.add_lock = False
         self.inc_lock = False
-        
+
     def cprint(self):
         print "Cyclic Array Count: ", self.count
         print self.l
-    
+
     def increase_count(self):
         if self.inc_lock:
             raise Exception("count increase is locked. First add new value to the cyclic array.")
@@ -86,55 +95,56 @@ class CyclicArray(object):
             self.count = 0
         self.inc_lock = True
         self.add_lock = False
-            
-    def add(self, entry, auto_increase = False):
+
+    def add(self, entry, auto_increase=False):
         if self.add_lock:
-            raise  Exception("add is locked. First increase count the add new values.")
+            raise Exception("add is locked. First increase count the add new values.")
         self.l[self.count] = entry
         self.add_lock = True
         self.inc_lock = False
         if auto_increase:
             self.increase_count()
-    
+
     def get_current_entry(self):
         return self.l[self.count]
-    
+
     def get_next_entry(self):
         if self.inc_lock:
             raise Exception("counter has already been incremented. Use current entry instead")
         if self.count == self.array_length - 1:
             return self.l[0]
         else:
-            return self.l[self.count+1]
+            return self.l[self.count + 1]
 
     def get_count(self):
         return self.count
-    
+
     def get_array_length(self):
         return len(self.l)
 
     def get_list(self):
         return self.l
-    
-    def isin(self, x = 0):
+
+    def isin(self, x=None):
         try:
             return self.l.index(x) >= 0
         except ValueError:
             return False
-        
+
     def change_array_length(self, new_length):
         if new_length < len(self.l):
-            self.l = self.l[:new_length -1]
+            self.l = self.l[:new_length - 1]
         elif new_length > len(self.l):
             self.l.extend((new_length - len(self.l)) * [None])
         self.array_length = len(self.l)
-        self.count = min(self.count, self.array_length -1)
-        
+        self.count = min(self.count, self.array_length - 1)
+
     def release_add_lock_if_necessary(self):
         if self.add_lock:
             self.increase_count()
-        
-def get_ca_len(name = ""):
+
+
+def get_ca_len(name=""):
     if name == "favorites":
         return cfg.number_active_favorites
     if name == "retweets":
@@ -142,20 +152,23 @@ def get_ca_len(name = ""):
     if name == "follows":
         return cfg.number_active_follows
 
-def ca_initialize(name = ""):
-    if not os.path.isfile(name+".sav"):
-        return CyclicArray(len = get_ca_len(name))
+
+def ca_initialize(name=""):
+    if not os.path.isfile(name + ".sav"):
+        return CyclicArray(length=get_ca_len(name))
     else:
-        ca = pickle.load(open(name+".sav", "rb"))
+        ca = pickle.load(open(name + ".sav", "rb"))
         if ca.get_array_length() != get_ca_len(name):
             print "length in config file has changed, tailoring..."
             ca.change_array_length(get_ca_len(name))
             print "new array length", ca.get_array_length()
         return ca
 
-def ca_save_state(ca = None, name = ""):
-    with open(name+".sav", 'w') as f:
-        pickle.dump(ca, f)    
+
+def ca_save_state(ca=None, name=""):
+    with open(name + ".sav", 'w') as f:
+        pickle.dump(ca, f)
+
 
 def connect_app_to_twitter():
     """
@@ -167,45 +180,52 @@ def connect_app_to_twitter():
     api = tweepy.API(auth)
     return auth, api
 
-def ru(s = ""):
+
+def ru(s=""):
     """
     resolve unicode and return printable string
     """
-    if type(s) == type(1) or type(s) == type(9999999999999999): return s
+    if type(s) == type(1) or type(s) == type(9999999999999999):
+        return s
     return None if not s else s.encode('ascii', 'ignore')
 
+
 def get_first_level_content(data, key):
-    if not key in data:
+    if key not in data:
         if cfg.verbose:
             print "key", key, "not found in tweet"
         return None
     return ru(data[key])
 
+
 def tweet2obj(data):
-    class t:pass
+    class Tweet:
+        pass
+
     data = json.loads(data)
     if verbose2:
         print data
     try:
-        t.text = get_first_level_content(data,"text")
-        t.lan = get_first_level_content(data,"lang")
-        t.created = get_first_level_content(data,"created_at")
-        t.id = get_first_level_content(data, "id")
-        t.favorite_count  = get_first_level_content(data, "favorite_count")
-        t.retweet_count = get_first_level_content(data, "retweet_count")
-        t.retweeted = get_first_level_content(data, "retweeted")
+        Tweet.text = get_first_level_content(data, "text")
+        Tweet.lan = get_first_level_content(data, "lang")
+        Tweet.created = get_first_level_content(data, "created_at")
+        Tweet.id = get_first_level_content(data, "id")
+        Tweet.favorite_count = get_first_level_content(data, "favorite_count")
+        Tweet.retweet_count = get_first_level_content(data, "retweet_count")
+        Tweet.retweeted = get_first_level_content(data, "retweeted")
         user = data["user"]
-        t.description = get_first_level_content(user,"description")
-        t.loc = get_first_level_content(user, "location")
-        t.user_lang = get_first_level_content(user, "lang")
-        t.user_id = get_first_level_content(user, "id")
-        t.user_name = get_first_level_content(user, "name")
-        t.user_screen_name = get_first_level_content(user, "screen_name")
-        t.user_description = get_first_level_content(user, "description")
-        t.user_no_followers = get_first_level_content(user, "followers_count")
-        return t
+        Tweet.description = get_first_level_content(user, "description")
+        Tweet.loc = get_first_level_content(user, "location")
+        Tweet.user_lang = get_first_level_content(user, "lang")
+        Tweet.user_id = get_first_level_content(user, "id")
+        Tweet.user_name = get_first_level_content(user, "name")
+        Tweet.user_screen_name = get_first_level_content(user, "screen_name")
+        Tweet.user_description = get_first_level_content(user, "description")
+        Tweet.user_no_followers = get_first_level_content(user, "followers_count")
+        return Tweet
     except:
         return None
+
 
 def print_tweet(t):
     print "-----"
@@ -224,31 +244,35 @@ def print_tweet(t):
     print t.user_no_followers
     print "#####"
 
-def add_favorite(id, api):
+
+def add_favorite(identifier, api):
     try:
-        api.create_favorite(id)
-        if cfg.verbose: print "favorite added"
-        logr.info("$$Favorite;%s"%(id))
+        api.create_favorite(identifier)
+        if cfg.verbose:
+            print "favorite added"
+        logr.info("$$Favorite;%s" % identifier)
         return True
     except tweepy.error.TweepError, e:
-        logr.info("FavoriteDenied;%s"%(id))
-        logr.error("in function add_favorite; %s"%e)
+        logr.info("FavoriteDenied;%s" % identifier)
+        logr.error("in function add_favorite; %s" % e)
         print e[0]
 
-def remove_favorite(id, api):
+
+def remove_favorite(identifier, api):
     try:
-        api.destroy_favorite(id)
-        if cfg.verbose: print "favorite removed"
-        logr.info("FavoriteDestroyed;%s"%(id))
+        api.destroy_favorite(identifier)
+        if cfg.verbose:
+            print "favorite removed"
+        logr.info("FavoriteDestroyed;%s" % identifier)
         return True
     except tweepy.error.TweepError, e:
         print e
-        logr.debug("in function remove_favorite; %s"%e)
+        logr.debug("in function remove_favorite; %s" % e)
 
 
 class BuildText(object):
     def __init__(self, preambles, hashtags):
-        #this line to be deleted and preambled removed from function call and in init
+        # this line to be deleted and preambled removed from function call and in init
         self.preambles = preambles
         self.hashtags = hashtags
         self.last_used_preamble = ""
@@ -270,7 +294,7 @@ class BuildText(object):
             if self.last_titles.isin(text):
                 raise Exception("already twittered")
             if len(text) > 20:
-                self.last_titles.add(text, auto_increase= True)
+                self.last_titles.add(text, auto_increase=True)
                 self.update_last_titles(self.last_titles)
                 return text
             else:
@@ -278,39 +302,42 @@ class BuildText(object):
         except Exception, e:
             return None
 
-    def load_last_titles(self):
-        with open("last_title.sav","r") as f:
+    @staticmethod
+    def load_last_titles():
+        with open("last_title.sav", "r") as f:
             return pickle.load(f)
 
-    def update_last_titles(self, l):
-        f = open("last_title.sav","w")
-        pickle.dump(l,f)
+    @staticmethod
+    def update_last_titles(l):
+        f = open("last_title.sav", "w")
+        pickle.dump(l, f)
         f.close()
         return
 
     def build_text(self, url):
         """
-        take in a URL and build a tweet around it. use preambles and hashtags from random choice but make sure not to repeat the last one.
+        take in a URL and build a tweet around it. use preambles and hashtags from random
+        choice but make sure not to repeat the last one.
         """
-        #choose preamble
-        #build first part of text
+        # choose preamble
+        # build first part of text
         title = self.get_title_from_website(url)
         if not title:
             return None, 0
-        text = "%s %s"%(title, url)
-        #Title must exist an consist of at least 4 words
+        text = "%s %s" % (title, url)
+        # Title must exist an consist of at least 4 words
         if not text or len(text.split(" ")) < 3:
             return None, 0
-        #add hashtags until tweet length is full
+        # add hashtags until tweet length is full
         score = bbanalytics.score_tweets(text)
         help_hashtags = []
         for i in xrange(3):
-            old_text = "%s"%text
-            hash = random.choice(self.hashtags)
-            if hash in help_hashtags:
+            old_text = "%s" % text
+            hashtag = random.choice(self.hashtags)
+            if hashtag in help_hashtags:
                 continue
-            help_hashtags.append(hash)
-            text += " " + hash
+            help_hashtags.append(hashtag)
+            text += " " + hashtag
             if len(text) > 140:
                 text = old_text
                 break
@@ -318,59 +345,69 @@ class BuildText(object):
             print "generic text:", text
         return text, score
 
+
 def update_status(text, api, score):
     if len(text) > 135:
-        if cfg.verbose: print "Text Too Long!"
+        if cfg.verbose:
+            print "Text Too Long!"
         return None
     try:
         # noinspection PyUnusedLocal
         status = api.update_status(text)
     except tweepy.error.TweepError, e:
-        logr.error("in function bblib:update_status;%s"%e)
-    logr.info("$$StatusUpdate;%d;%s"%(score,text))
+        logr.error("in function bblib:update_status;%s" % e)
+    logr.info("$$StatusUpdate;%d;%s" % (score, text))
     return
 
-def retweet(id, api):
+
+def retweet(identifier, api):
     try:
-        status = api.retweet(id)
-        if cfg.verbose: print "retweeted"
-        logr.info("$$Retweet;%s;%s"%(id,status.id))
+        status = api.retweet(identifier)
+        if cfg.verbose:
+            print "retweeted"
+        logr.info("$$Retweet;%s;%s" % (identifier, status.id))
         return status.id
     except tweepy.error.TweepError, e:
         print e
-        logr.info("RetweetDenied;%s"%(id))
-        logr.error("in function bblib:retweet;%s"%e)
+        logr.info("RetweetDenied;%s" % identifier)
+        logr.error("in function bblib:retweet;%s" % e)
         return False
-    
-def remove_retweet(id, api):
+
+
+def remove_retweet(identifier, api):
     try:
-        api.destroy_status(id)
-        logr.info("RetweetDestroyed;%s"%(id))
+        api.destroy_status(identifier)
+        logr.info("RetweetDestroyed;%s" % identifier)
         return True
     except tweepy.error.TweepError, e:
         print e
-        logr.info("RetweetDestroyDenied;%s"%(id))
-        logr.error("in function: remove retweet; %s"%e)
+        logr.info("RetweetDestroyDenied;%s" % identifier)
+        logr.error("in function: remove retweet; %s" % e)
         return False
+
 
 def in_time():
     now = datetime.datetime.now()
     now_time = now.time()
-    if now_time >= datetime.time(8,0) and now_time <= datetime.time(10,30):
+    if datetime.time(8, 0) <= now_time <= datetime.time(10, 30):
         return True
-    if now_time >= datetime.time(11,45) and now_time <= datetime.time(22,00):
+    if datetime.time(11, 45) <= now_time <= datetime.time(22, 00):
         return True
-    if cfg.verbose: print "Request not in allowed time"
+    if cfg.verbose:
+        print "Request not in allowed time"
     return False
+
 
 def get_today():
     return str(datetime.date.today())
 
 
 def update_max_followers_today(today):
-    max_number_follows_per_day[today] = min(992, max(195, get_info_from_account_id(session.api, cfg.own_twittername).followers_count))
-    logr.info('set max_number_follows_to%d'%max_number_follows_per_day[today])
-    #ToDO drop all other dates to avoid memory leaks:
+    max_number_follows_per_day[today] = min(992, max(195, get_info_from_account_id(
+        Session.api,
+        cfg.own_twittername).followers_count))
+    logr.info('set max_number_follows_to%d' % max_number_follows_per_day[today])
+    # ToDO drop all other dates to avoid memory leaks:
 
 
 def follow_gate_open():
@@ -380,7 +417,7 @@ def follow_gate_open():
         logr.info("$$set_number_followers_for_today")
         update_max_followers_today(today)
     if ex_today >= max_number_follows_per_day[today]:
-        print today,"executed number of follows", ex_today
+        print today, "executed number of follows", ex_today
         logr.info("$$max_no_follows_reached")
         return False
     if not in_time():
@@ -389,33 +426,35 @@ def follow_gate_open():
     return True
 
 
-def add_as_follower(t, api, verbose = False):
+def add_as_follower(t, api, verbose=False):
     today = str(datetime.date.today())
     if not follow_gate_open():
         logr.info("Follow Gate Closed")
         if verbose:
-            if cfg.verbose: print "follow gate closed"
+            if cfg.verbose:
+                print "follow gate closed"
         return False
-    if not t.user_lang in cfg.languages:
+    if t.user_lang not in cfg.languages:
         logr.info("follow not carried out because language did not match")
-        return False 
+        return False
     try:
         api.create_friendship(t.user_screen_name)
-        if cfg.verbose: print datetime.datetime.now(),"followed", t.user_name, t.user_screen_name
-        logr.info("$$followinguser;%s,%s;%s;%s",t.user_id, t.user_name, t.user_screen_name, t.user_description)
+        if cfg.verbose:
+            print datetime.datetime.now(), "followed", t.user_name, t.user_screen_name
+        logr.info("$$followinguser;%s,%s;%s;%s", t.user_id, t.user_name, t.user_screen_name, t.user_description)
         if cfg.verbose:
             print "Following User"
             print t.user_screen_name
             print t.user_description
-        executed_number_follows_per_day[today] += 1        
+        executed_number_follows_per_day[today] += 1
         return True
     except tweepy.error.TweepError, e:
-        print e        
+        print e
         error_code = e[0][0]["code"]
-        if error_code == 161: 
+        if error_code == 161:
             logr.info("follower_level_reached")
             print "Follower level reached this should not happen. Function: add_as_follower in bblib.py"
-            executed_number_follows_per_day[today] = max_no_followers_per_day
+            executed_number_follows_per_day[today] = max_number_follows_per_day
             time.sleep(360)
         if error_code == 89 or 'expired token' in e:
             logr.error('critical: new token required! access apps.twitter.com')
@@ -425,9 +464,10 @@ def add_as_follower(t, api, verbose = False):
             logr.error('critical: app unauthorized! access apps.twitter.com')
             print 'error'
             sys.exit()
-        logr.error("in function add_as_follower;%s"%e)
+        logr.error("in function add_as_follower;%s" % e)
         sys.exit()
-        
+
+
 def remove_follow(screen_name, api):
     if str(screen_name).isdigit():
         try:
@@ -435,34 +475,36 @@ def remove_follow(screen_name, api):
         except:
             raise Exception("In Function remove_follow. User object could not be loaded.")
         screen_name = user.screen_name
-    
+
     if screen_name in cfg.accounts_never_delete:
-        logr.info("unfollowprevented;%s"%(screen_name))
-        return 
+        logr.info("unfollowprevented;%s" % screen_name)
+        return
     try:
         api.destroy_friendship(screen_name)
-        logr.info("destroyedfriendship;%s",screen_name)
+        logr.info("destroyedfriendship;%s", screen_name)
     except tweepy.error.TweepError, e:
         print e
-        logr.error("in function remove_follow; %s"%e)
+        logr.error("in function remove_follow; %s" % e)
 
-def get_statuses(api, username = None):
+
+def get_statuses(api, username=None):
     """
     important note: this method only returns statuses but not retweets
     :param api: twitter api
     :param username: own twittername or given screen_name
     :return: list of statuses
     """
-    if not username: username = cfg.own_twittername
-    tl = api.user_timeline(screen_name = username, count = 200)
-    if len(tl) > 0 :
+    if not username:
+        username = cfg.own_twittername
+    tl = api.user_timeline(screen_name=username, count=200)
+    if len(tl) > 0:
         max_id = tl[-1].id
     else:
         return []
     print len(tl)
     while True:
-        tlx = api.user_timeline(screen_name = username, count = 200, max_id = max_id)
-        if len(tlx)>1:
+        tlx = api.user_timeline(screen_name=username, count=200, max_id=max_id)
+        if len(tlx) > 1:
             tl.extend(tlx)
             if len(tl) > 0:
                 max_id = tl[-1].id
@@ -475,28 +517,29 @@ def get_statuses(api, username = None):
     return tl
 
 
-def get_info_from_account_id(api = None, id = 0):
-    user = api.get_user(id)
+def get_info_from_account_id(api=None, identifier=0):
+    user = api.get_user(identifier)
     return user
 
 
-def get_all_friends(api, username = None):
+def get_all_friends(api, username=None):
     """
     important note: this method only returns statuses but not retweets
     :param api: twitter api
     :param username: own twittername or given screen_name
     :return: list of statuses
     """
-    if not username: username = cfg.own_twittername
-    tl = api.friends_ids(screen_name = username, count = 200)
-    if len(tl) > 0 :
+    if not username:
+        username = cfg.own_twittername
+    tl = api.friends_ids(screen_name=username, count=200)
+    if len(tl) > 0:
         max_id = tl[-1].id
     else:
         return []
     print len(tl)
     while True:
-        tlx = api.friends_ids(screen_name = username, count = 200, max_id = max_id)
-        if len(tlx)>1:
+        tlx = api.friends_ids(screen_name=username, count=200, max_id=max_id)
+        if len(tlx) > 1:
             tl.extend(tlx)
             if len(tl) > 0:
                 max_id = tl[-1].id
@@ -509,10 +552,7 @@ def get_all_friends(api, username = None):
     return tl
 
 
-
-
-
-def get_friends_ids(api, user = None):
+def get_friends_ids(api, user=None):
     """
     :param api: twitter api object
     :param user: twitter user object. if no user is provided, the user that the api refers to is used.
@@ -526,9 +566,10 @@ def get_friends_ids(api, user = None):
 
     return user.friends_ids()
 
+
 class UpdateUserInfo(object):
     def __init__(self, api, account_name):
-        #If this is not run from the berlin server, a ssh tunnel must be established first
+        # If this is not run from the berlin server, a ssh tunnel must be established first
         client = pymongo.MongoClient("mongodb://localhost:27017")
         self.db = client.friends
         self.api = api
@@ -544,24 +585,23 @@ class UpdateUserInfo(object):
         return bool(self.db[self.account_name].find({"_id": update_id}).count())
 
     def update_info_in_mongodb(self, info):
-        #set a propoer _id variable for mongodb that corresponds with the Twitter user_id
+        # set a propoer _id variable for mongodb that corresponds with the Twitter user_id
         info._json["_id"] = info.id
         try:
             self.db[self.account_name].update_one(
                 {"_id": info.id},
                 {
-                "$set":info._json,
-                "$currentDate": {"lastModified": True}
+                    "$set": info._json,
+                    "$currentDate": {"lastModified": True}
                 },
-                upsert = True)
+                upsert=True)
             print "updated", info.id
         except Exception, e:
             logr.error("in function update_info_in_mongodb; %s" % e)
 
-    def update_user_info(self,n = 10):
+    def update_user_info(self, n=10):
         """
         update the user info to the database
-        :param api: API
         :param n: Number of users to be updated
         """
         ids = get_friends_ids(self.api)
@@ -569,22 +609,23 @@ class UpdateUserInfo(object):
             info = self.get_user_info(user_id)
             self.update_info_in_mongodb(info)
 
-    def get_user_info(self, id = 0):
-        info = get_info_from_account_id(api=self.api, id= id)
+    def get_user_info(self, identifier=0):
+        info = get_info_from_account_id(api=self.api, identifier=identifier)
         return info
 
-def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
+
+def cleanup_followers(api, ca_follow=None, ca_stat=None):
     me = api.me()
-    friends_diff = me.friends_count - (cfg.number_active_follows+10)
+    friends_diff = me.friends_count - (cfg.number_active_follows + 10)
     friends_ids = get_friends_ids(api=api, user=me)
     print len(friends_ids), "friends found"
     if friends_diff > 0:
-        for friend in random.sample(friends_ids,friends_diff+20):
-            #replace screen name and pop ids from friends and refresh cyclic array
+        for friend in random.sample(friends_ids, friends_diff + 20):
+            # replace screen name and pop ids from friends and refresh cyclic array
             user = api.get_user(friend)
             screen_name = user.screen_name
             remove_follow(screen_name, api)
-            logr.info("cleanupdestroy %s"%screen_name)
+            logr.info("cleanupdestroy %s" % screen_name)
             friends_ids.pop(friends_ids.index(friend))
     ca_follow.load_with_array(friends_ids)
 
@@ -593,7 +634,7 @@ def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
     print nstatuses, "statuses (exluding retweets) found"
     stat_diff = nstatuses - cfg.number_active_retweets
     if stat_diff > 0:
-        for status in random.sample(statuses, min(nstatuses, stat_diff+20)):
+        for status in random.sample(statuses, min(nstatuses, stat_diff + 20)):
             try:
                 api.destroy_status(status.id)
                 logr.info("cleanupremovestatus %s %d" % (status.id, stat_diff))
@@ -603,12 +644,12 @@ def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
                 pass
     ca_stat.load_with_array(statuses)
 
-    if me.favourites_count > cfg.number_active_favorites+9:
+    if me.favourites_count > cfg.number_active_favorites + 9:
         fav_diff = me.favourites_count - cfg.number_active_favorites
         for fav in api.favorites():
             try:
                 remove_favorite(fav.id, api)
-                logr.info("cleanupremovefavorite %s %d"(fav.id, fav_diff))
+                logr.info("cleanupremovefavorite %s %d" % (fav.id, fav_diff))
                 fav_diff -= 1
             except:
                 pass
@@ -616,14 +657,14 @@ def cleanup_followers(api, ca_follow = None, ca_stat = None, ca_fav = None):
 
 ###
 ###
-#Test Connect to Stream
+# Test Connect to Stream
 ###
 ###
 
 
-def get_recent_follows(days = 50):
+def get_recent_follows(days=50):
     today = datetime.date.today()
-    begin_date = today - datetime.timedelta(days = days)
+    begin_date = today - datetime.timedelta(days=days)
     res = []
     logfile = "../accounts/%s/bluebird.log" % (cfg.own_twittername if cfg else "AlexanderD_Beck")
     with open(logfile, 'r') as f:
@@ -631,32 +672,35 @@ def get_recent_follows(days = 50):
             if "$$followinguser" in line:
                 lv = line.split(';')
                 strdate = lv[0].split(" ")[0]
-                y,m,d = [int(x) for x in strdate.split('-')]
-                if begin_date < datetime.date(y,m,d):
+                y, m, d = [int(x) for x in strdate.split('-')]
+                if begin_date < datetime.date(y, m, d):
                     res.append(int(lv[1].split(',')[0]))
     return set(res)
-
-
 
 
 class DummyListener(tweepy.StreamListener):
     def __init__(self):
         self.f = open("dev_dump.txt", "w")
+
     def on_data(self, data):
-        #print "Tweet Start"
+        # print "Tweet Start"
         self.f.write(data)
-        #pprint(json.loads(data))
+        # pprint(json.loads(data))
         tweet = tweet2obj(data)
-        if not tweet: return True
+        if not tweet:
+            return True
         print('.'),
-        #print tweet.text
-        #print tweet.created
-        #print tweet.favorite_count
-        #print "Tweet End \n"
+        # print tweet.text
+        # print tweet.created
+        # print tweet.favorite_count
+        # print "Tweet End \n"
         return True
-    def on_error(self, status):
+
+    @staticmethod
+    def on_error(status):
         print "error: ",
         print status
+
 
 def test_stream():
     print "running test_stream"
@@ -671,10 +715,3 @@ def test_stream():
         except Exception, e:
             print e
             pass
-
-if __name__ == '__main__':
-    from pprint import pprint
-    #connect_app_to_twitter()
-    #test_stream()
-    #get_recent_follows()
-

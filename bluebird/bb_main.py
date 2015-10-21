@@ -170,10 +170,10 @@ class FavListener(tweepy.StreamListener):
         # self.ca_f = bbl.ca_initialize("follows")
 
         # build the followers cyclic array
-        self.ca_f = bbl.CyclicArray(len=bbl.get_ca_len("follows"))
-        self.ca_r = bbl.CyclicArray(len=bbl.get_ca_len("retweets"))
+        self.ca_f = bbl.CyclicArray(length=bbl.get_ca_len("follows"))
+        self.ca_r = bbl.CyclicArray(length=bbl.get_ca_len("retweets"))
         # refresh followers and statusses
-        bbl.cleanup_followers(api, ca_follow=self.ca_f, ca_stat=self.ca_r, ca_fav=self.ca)
+        bbl.cleanup_followers(api, ca_follow=self.ca_f, ca_stat=self.ca_r)
 
         self.ca_recent_r = bbl.CyclicArray(100)
         self.ca_recent_f = bbl.CyclicArray(100)

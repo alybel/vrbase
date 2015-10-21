@@ -184,7 +184,7 @@ class FavListener(tweepy.StreamListener):
 
         # Buffers for all 4 Types of Interaction
         self.tbuffer = tweet_buffer(api=self.api, ca=self.ca_f, management_fct=follow_management,
-                                    delta_time=cfg.activity_frequency, max_number_actions=200)
+                                    delta_time=cfg.activity_frequency, max_number_actions=3)
         self.tbuffer_rt = tweet_buffer(api=self.api, ca=self.ca_r, management_fct=retweet_management,
                                        delta_time=cfg.activity_frequency)
         self.tbuffer_fav = tweet_buffer(api=self.api, ca=self.ca, management_fct=favorite_management,

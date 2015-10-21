@@ -4,7 +4,6 @@
 import logging
 import logging.handlers
 import sys
-import time
 import traceback
 import random
 import argparse
@@ -25,7 +24,6 @@ TextBuilder = None
 recent_follows = []
 
 
-
 class ManageUpdatesPerDay(object):
     def __init__(self, max_updates, use_timer=False):
         self.max_updates = max_updates
@@ -44,9 +42,11 @@ class ManageUpdatesPerDay(object):
         self.clean_dict(self.timer)
         self.no_updates[bbl.get_today()] += 1
         if self.use_timer:
-            self.timer[bbl.get_today()] = time.time() + min(nr.exponential(24*60*60./self.max_updates), 2*60*60)
+            self.timer[bbl.get_today()] = time.time() + min(nr.exponential(24 * 60 * 60. / self.max_updates),
+                                                            2 * 60 * 60)
 
-    def clean_dict(self, d):
+    @staticmethod
+    def clean_dict(d):
         for key in d:
             if not key == bbl.get_today():
                 del d[key]
@@ -92,7 +92,7 @@ def retweet_management(t, ca, api):
     ca.add(rt_id)
     next_entry = ca.get_next_entry()
     if next_entry:
-        # try except needed becasue retweets may not exist anymore in the future. removing them would then throw an error
+        # try except needed becasue retweets may not exist anymore in the future. removing them would then throw error
         try:
             bbl.remove_retweet(next_entry, api)
         except:
@@ -114,6 +114,7 @@ def follow_management(t, ca, api):
     recent_follows.append(t.user_id)
     next_entry = ca.get_next_entry()
     if next_entry:
+        # user may not exist any more in the future. hence errors here need to be catched.
         try:
             bbl.remove_follow(next_entry, api)
         except:
@@ -123,7 +124,7 @@ def follow_management(t, ca, api):
     return True
 
 
-class tweet_buffer(object):
+class TweetBuffer(object):
     def __init__(self, ca, api, management_fct, delta_time, max_number_actions=3):
         self.buffer = []
         self.ca = ca
@@ -161,7 +162,8 @@ class FavListener(tweepy.StreamListener):
     def __init__(self, api):
         tweepy.StreamListener.__init__(self)
         self.api = api
-        # ca is a cyclic array that contains the tweet ID's there were favorited. Once the number_active_favorites is reached,
+        # ca is a cyclic array that contains the tweet ID's there were favorited.
+        # Once the number_active_favorites is reached,
         # the oldest favorite is automatically removeedd.
         self.ca = bbl.ca_initialize("favorites")
         # self.ca_r = bbl.ca_initialize("retweets")
@@ -183,12 +185,15 @@ class FavListener(tweepy.StreamListener):
         self.CSim = bba.CosineStringSimilarity()
 
         # Buffers for all 4 Types of Interaction
-        self.tbuffer = tweet_buffer(api=self.api, ca=self.ca_f, management_fct=follow_management,
-                                    delta_time=cfg.activity_frequency, max_number_actions=3)
-        self.tbuffer_rt = tweet_buffer(api=self.api, ca=self.ca_r, management_fct=retweet_management,
-                                       delta_time=cfg.activity_frequency)
-        self.tbuffer_fav = tweet_buffer(api=self.api, ca=self.ca, management_fct=favorite_management,
-                                        delta_time=cfg.activity_frequency)
+        self.tbuffer = TweetBuffer(
+            api=self.api, ca=self.ca_f, management_fct=follow_management,
+            delta_time=cfg.activity_frequency, max_number_actions=3)
+        self.tbuffer_rt = TweetBuffer(
+            api=self.api, ca=self.ca_r, management_fct=retweet_management,
+            delta_time=cfg.activity_frequency)
+        self.tbuffer_fav = TweetBuffer(
+            api=self.api, ca=self.ca, management_fct=favorite_management,
+            delta_time=cfg.activity_frequency)
 
         # TODO: ReWrite recent_follows such that vector does not become infinitely long ...
         global recent_follows
@@ -199,8 +204,6 @@ class FavListener(tweepy.StreamListener):
         except IndexError:
             # in case no follows have been carried out yet.
             pass
-
-            # self.tbuffer_status = tweet_buffer(api = self.api, ca = self.ca_st, management_fct=follow_management)
 
     def on_data(self, data):
         t = bbl.tweet2obj(data)
@@ -213,8 +216,8 @@ class FavListener(tweepy.StreamListener):
         if not bba.filter_tweets(t):
             return True
         if "dump_read" in vars(cfg):
-            if cfg.dump_read == True:
-#                logr.info("$$DUMP", t.text, t.user_screen_name, t.description, t.created, t.id)
+            if cfg.dump_read:
+                # logr.info("$$DUMP", t.text, t.user_screen_name, t.description, t.created, t.id)
                 with open('/home/vr/dumps/feed.txt', 'a+') as f:
                     f.write(data)
         # add score if tweet is relevant
@@ -222,7 +225,7 @@ class FavListener(tweepy.StreamListener):
         # Manage Favorites
         if score >= cfg.favorite_score:
             if self.CSim.tweets_similar_list(t.text, self.ca_recent_f.get_list()):
-                logr.info("favoriteprevented2similar;%s" % (t.id))
+                logr.info("favoriteprevented2similar;%s" % t.id)
                 return True
             self.tbuffer_fav.add_to_buffer(t, score)
             self.ca_recent_f.add(t.text, auto_increase=True)
@@ -235,7 +238,8 @@ class FavListener(tweepy.StreamListener):
                 # check if score2 also fulfills the score criteria
                 if score2 < cfg.status_update_score:
                     return True
-                # in case the text retrieved from the headline contains negative or forbidden keywords, don't send the update
+                # in case the text retrieved from the headline contains negative or
+                # forbidden keywords, don't send the update
                 if text:  # in some cases, text may be None.
                     if bba.score_tweets(text, verbose=verbose) < cfg.status_update_score:
                         return True
@@ -251,7 +255,7 @@ class FavListener(tweepy.StreamListener):
         # Manage Retweetssour
         if score >= cfg.retweet_score:
             if self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
-                logr.info("retweetprevented2similar;%s" % (t.id))
+                logr.info("retweetprevented2similar;%s" % t.id)
                 return True
             self.tbuffer_rt.add_to_buffer(t, score)
             self.ca_recent_r.add(t.text, auto_increase=True)
@@ -261,14 +265,16 @@ class FavListener(tweepy.StreamListener):
             if "follow_prob" in vars(cfg):
                 if random.random() > cfg.follow_prob:
                     return True
-            # Check if the person to follow has been already followed in the past X days. In this case, do not follow again until this period is over.
+            # Check if the person to follow has been already followed in the past X days.
+            # In this case, do not follow again until this period is over.
             if int(t.user_id) in recent_follows:
-                logr.info("refollowprevented;%s" % (t.user_id))
+                logr.info("refollowprevented;%s" % t.user_id)
                 return True
             self.tbuffer.add_to_buffer(t, score)
         return True
 
-    def on_error(self, status):
+    @staticmethod
+    def on_error(status):
         print "error: ",
         print status
 
@@ -277,21 +283,21 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Account Location has to be provided as a parameter")
     parser.add_argument('-l', '--location', help='account name', required=True)
-    args = parser.parse_args()
+    sysargs = parser.parse_args()
 
-    account_path = "../accounts/%s/" % args.location
+    account_path = "../accounts/%s/" % sysargs.location
     print account_path
     sys.path.append(account_path)
-    import load_config
     try:
         # Here, decide if you want to use the config from file or load from database
         import config as cfg
-        #cfg = load_config.load_config(args.location)
+        # cfg = load_config.load_config(args.location)
     except ImportError:
-        print "Account %s does not exist" % args.location
+        cfg = None
+        print "Account %s does not exist" % sysargs.location
         sys.exit(0)
     print cfg.keywords
-    if cfg.own_twittername != args.location:
+    if cfg.own_twittername != sysargs.location:
         print "serious error in starting: Twittername not same as account folder name!"
     print "running account:"
     print cfg.own_twittername
@@ -317,10 +323,10 @@ if __name__ == "__main__":
     # TODO below object not yet in use. Find proper use of it in a place where it
     # not called to oftern
     TextBuilder = bbl.BuildText(preambles=cfg.preambles, hashtags=cfg.hashtags)
-    auth, api = bbl.connect_app_to_twitter()
-    bbl.set_api(api)
-    update_user_info = bbl.UpdateUserInfo(api=api, account_name=cfg.own_twittername)
-    l = FavListener(api)
+    auth, global_api = bbl.connect_app_to_twitter()
+    bbl.set_api(global_api)
+    update_user_info = bbl.UpdateUserInfo(api=global_api, account_name=cfg.own_twittername)
+    l = FavListener(global_api)
     stream = bbl.tweepy.Stream(auth, l)
     logr.info("EngineStarted")
     while True:

@@ -258,6 +258,7 @@ class BuildText(object):
             self.last_titles = CyclicArray(100)
 
     def get_title_from_website(self, url):
+        # noinspection PyUnusedLocal
         try:
             t = lxml.html.parse(url)
             text = t.find(".//title").text
@@ -322,6 +323,7 @@ def update_status(text, api, score):
         if cfg.verbose: print "Text Too Long!"
         return None
     try:
+        # noinspection PyUnusedLocal
         status = api.update_status(text)
     except tweepy.error.TweepError, e:
         logr.error("in function bblib:update_status;%s"%e)

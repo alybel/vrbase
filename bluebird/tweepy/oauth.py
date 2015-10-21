@@ -62,10 +62,12 @@ def generate_timestamp():
 
 def generate_nonce(length=8):
     """Generate pseudorandom number."""
+    # noinspection PyUnusedLocal
     return ''.join([str(random.randint(0, 9)) for i in range(length)])
 
 def generate_verifier(length=8):
     """Generate pseudorandom number."""
+    # noinspection PyUnusedLocal
     return ''.join([str(random.randint(0, 9)) for i in range(length)])
 
 
@@ -396,6 +398,7 @@ class OAuthServer(object):
             token = self._get_token(oauth_request, 'request')
         except OAuthError:
             # No token required for the initial token request.
+            # noinspection PyUnusedLocal
             version = self._get_version(oauth_request)
             consumer = self._get_consumer(oauth_request)
             try:
@@ -411,6 +414,7 @@ class OAuthServer(object):
         """Processes an access_token request and returns the
         access token on success.
         """
+        # noinspection PyUnusedLocal
         version = self._get_version(oauth_request)
         consumer = self._get_consumer(oauth_request)
         try:
@@ -426,6 +430,7 @@ class OAuthServer(object):
     def verify_request(self, oauth_request):
         """Verifies an api call and checks all the parameters."""
         # -> consumer and token
+        # noinspection PyUnusedLocal
         version = self._get_version(oauth_request)
         consumer = self._get_consumer(oauth_request)
         # Get the access token.
@@ -508,6 +513,7 @@ class OAuthServer(object):
                 oauth_request, consumer, token)
             raise OAuthError('Invalid signature. Expected signature base '
                 'string: %s' % base)
+        # noinspection PyUnusedLocal
         built = signature_method.build_signature(oauth_request, consumer, token)
 
     def _check_timestamp(self, timestamp):

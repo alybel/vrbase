@@ -19,7 +19,7 @@ def start_account(account = ""):
         return False
     os.chdir("bluebird/")
     print "starting account", account
-    outfile = "../stdout/%s.out" % account
+    outfile = "/home/vr/valureach_ops/stdout/%s.out" % account
     with open(outfile, "w") as f:
         subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout = f, stderr = f)
     os.chdir("../")

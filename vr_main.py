@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-#this shebang uses the python that is currently activated
+# this shebang uses the python that is currently activated
 import glob
 import subprocess
 import os
 import sys
 import psutil
+
 
 def get_accounts():
     """
@@ -13,7 +14,8 @@ def get_accounts():
     al = glob.glob("accounts/*/")
     return [x.split("/")[1] for x in al]
 
-def start_account(account = ""):
+
+def start_account(account=""):
     if os.path.isfile("accounts/%s/.lock" % account):
         print "Account", account, "is locked. is already running?"
         return False
@@ -21,14 +23,15 @@ def start_account(account = ""):
     print "starting account", account
     outfile = "/home/vr/valureach_ops/stdout/%s.out" % account
     with open(outfile, "w") as f:
-        subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout = f, stderr = f)
+        subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout=f, stderr=f)
     os.chdir("../")
-    subprocess.call(["touch","accounts/%s/.lock" % account])
+    subprocess.call(["touch", "accounts/%s/.lock" % account])
     return True
 
-def stop_account(account = "", auto_call = False):
+
+def stop_account(account="", auto_call=False):
     procname = "bb_main.py"
-    subprocess.call(["rm","accounts/%s/.lock" % account])
+    subprocess.call(["rm", "accounts/%s/.lock" % account])
     print "lockfile removed"
     for proc in psutil.process_iter():
         try:
@@ -40,11 +43,12 @@ def stop_account(account = "", auto_call = False):
                 psutil.Process(proc.pid).kill()
                 return True
         except psutil.AccessDenied:
-            #these are root processes that cannot be looked into
+            # these are root processes that cannot be looked into
             pass
     if not auto_call:
         print "no running proccess for account", account, "could be found"
     return False
+
 
 def run_vr():
     accounts = get_accounts()
@@ -52,11 +56,13 @@ def run_vr():
         start_account(account)
     return
 
+
 def remove_all_lockfiles():
     accounts = get_accounts()
     for account in accounts:
-        subprocess.call(["rm","accounts/%s/.lock" % account])
+        subprocess.call(["rm", "accounts/%s/.lock" % account])
     print "all lockfiles removed"
+
 
 if __name__ == "__main__":
     if not len(sys.argv) == 3:
@@ -91,4 +97,3 @@ if __name__ == "__main__":
         else:
             stop_account(arg2)
             start_account(arg2)
-

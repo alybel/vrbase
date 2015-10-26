@@ -1,5 +1,3 @@
-__author__ = 'alex'
-
 from sqlalchemy import schema, types, create_engine, orm
 
 
@@ -15,7 +13,8 @@ def load_config(own_twittername=''):
     bl = md.tables['BlacklistKeywords']
     wl = md.tables['WhitelistKeywords']
 
-    class cfg: pass
+    class cfg:
+        pass
 
     cfg = cfg()
 

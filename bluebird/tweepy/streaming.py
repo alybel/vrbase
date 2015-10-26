@@ -123,7 +123,7 @@ class Stream(object):
         self.retry_time_cap = options.get("retry_time_cap", 320.0)
         self.snooze_time_step = options.get("snooze_time", 0.25)
         self.snooze_time_cap = options.get("snooze_time_cap", 16)
-        self.buffer_size = options.get("buffer_size",  1500)
+        self.buffer_size = options.get("buffer_size", 1500)
         if options.get("secure", True):
             self.scheme = "https"
         else:

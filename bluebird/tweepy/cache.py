@@ -80,7 +80,8 @@ class MemoryCache(Cache):
         self._entries = state['entries']
         self.timeout = state['timeout']
 
-    def _is_expired(self, entry, timeout):
+    @staticmethod
+    def _is_expired(entry, timeout):
         return timeout > 0 and (time.time() - entry[0]) >= timeout
 
     def store(self, key, value):
@@ -164,10 +165,12 @@ class FileCache(Cache):
         md5.update(key)
         return os.path.join(self.cache_dir, md5.hexdigest())
 
-    def _lock_file_dummy(self, path, exclusive=True):
+    @staticmethod
+    def _lock_file_dummy(path, exclusive=True):
         return None
 
-    def _unlock_file_dummy(self, lock):
+    @staticmethod
+    def _unlock_file_dummy(lock):
         return
 
     def _lock_file_posix(self, path, exclusive=True):

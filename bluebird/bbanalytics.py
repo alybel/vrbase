@@ -57,7 +57,7 @@ def manage_keywords(d):
             kv = key.split(" ")
             for k in kv:
                 #add each part of a keyword to the dict
-                d[k] = d[key]/2.
+                d[k] = d[key] / 2.
             #add the joint parts of the keyword to the dict
             d["".join(kv)] = d[key]
     return d
@@ -78,7 +78,7 @@ def manage_keywords2(d):
 def generic_filter(entity, compare_list):
     if not compare_list:
         return True
-    if not entity in compare_list:
+    if entity not in compare_list:
         return False
     return True
 
@@ -92,7 +92,9 @@ def loc_filter(loc):
 
 def filter_unwanted_content(t):
 
-    excluded_content = ["thong", "pussy", "horny", "sex", "porn", "drug", "xxx", "naked", "nackt", "pussies", "ass", "bikini", "tits", "hot", "sexy", "naughty", "panty", "nasty", "bitch", "toy", "dildo", "vibrator", "upskirt", "downblouse", "strip", "boobs", "seitensprung"]
+    excluded_content = ["thong", "pussy", "horny", "sex", "porn", "drug", "xxx", "naked", "nackt", "pussies", "ass",
+                        "bikini", "tits", "hot", "sexy", "naughty", "panty", "nasty", "bitch", "toy", "dildo",
+                        "vibrator", "upskirt", "downblouse", "strip", "boobs", "seitensprung"]
     for word in excluded_content:
         if word in t.text:
             return False
@@ -109,12 +111,12 @@ def filter_tweets(t):
         return False
     if cfg.only_with_url and not is_url_in_tweet(t.text):
         return False
-    if cfg.number_hashtags >= 0 and number_hashtags(t.text) > cfg.number_hashtags:
+    if 0 <= cfg.number_hashtags < number_hashtags(t.text):
         return False
     return lan_filter(t.lan) and loc_filter(t.loc)
 
 
-def split_and_clean_text(t = ""):
+def split_and_clean_text(t=""):
     t = t.lower()
     for p in [",","!","?",".","]","["]:
         t = t.replace(p," ")
@@ -160,15 +162,18 @@ def eval_tweet2(t):
     score = 0
     used_words = []
     for i, word in enumerate(t):
-        if word in used_words: continue
+        if word in used_words:
+            continue
         if word in keywords:
             score += keywords[word]
             used_words.append(word)
         else:
-            if i == len(t)-1: continue
+            if i == len(t) - 1:
+                continue
             #build the combination of a word plus the subsequent word
-            comb = word+t[i+1]
-            if comb in used_words: continue
+            comb = word + t[i + 1]
+            if comb in used_words:
+                continue
             if comb in keywords:
                 score += keywords[comb]
                 used_words.append(comb)
@@ -222,7 +227,8 @@ class CosineStringSimilarity(object):
         self.filling_words = [x.lower() for x in filling_words]
         self.WORD = re.compile(r'\w+')
         
-    def get_cosine(self, vec1, vec2):
+    @staticmethod
+    def get_cosine(vec1, vec2):
         intersection = set(vec1.keys()) & set(vec2.keys())
         numerator = sum([vec1[x] * vec2[x] for x in intersection])
         sum1 = sum([vec1[x]**2 for x in vec1.keys()])
@@ -256,13 +262,3 @@ class CosineStringSimilarity(object):
             
 def minutes_of_day():
     return datetime.datetime.now().time().minute + datetime.datetime.now().time().hour * 60
-
-
-if __name__ == "__main__":
-    class a:
-        text = "test textwef"
-        description = "test description"
-        user_screen_name = "qwdgba"
-        user_name = "sdf afs thong"
-    
-    print filter_unwanted_content(a)

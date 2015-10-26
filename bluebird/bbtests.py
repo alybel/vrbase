@@ -67,10 +67,13 @@ class TestTweetSimilarity(unittest.TestCase):
         self.t2 = "RT @fasiufa Offshore Bank Account | Business in Gujarat | Gateway to Startups and Entrepreneurship htt://adfr.i"
         self.t3 = "Six steps to a successful small business : 6 articles and videos | Business in Gujarat | Gateway to Startups and... http://dlvr.it/5XXSXq"
         self.CSim = bba.CosineStringSimilarity()
+
     def test_for_same(self):
         self.assertTrue(self.CSim.tweets_similar(self.t1, self.t1))
+
     def test_for_similar(self):
         self.assertTrue(self.CSim.tweets_similar(self.t1,self.t2))
+
     def test_for_not_similar(self):
         self.assertTrue(not self.CSim.tweets_similar(self.t1,self.t3))
 

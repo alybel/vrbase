@@ -7,12 +7,14 @@ import bbanalytics as bba
 
 auth, api = bbl.connect_app_to_twitter()
 
+
 def get_friends_ids():
     """
     returns a vector or ids of users who follow me.
     :return: list
     """
     return api.followers()
+
 
 def remove_people_who_dont_follow_back():
     users = get_friends_ids()
@@ -31,4 +33,3 @@ def test_tweet_scores():
 
 if __name__ == '__main__':
     test_tweet_scores()
-

@@ -34,8 +34,6 @@ def convert_to_utf8_str(arg):
         arg = str(arg)
     return arg
 
-
-
 def import_simplejson():
     try:
         import simplejson as json
@@ -47,7 +45,6 @@ def import_simplejson():
                 from django.utils import simplejson as json  # Google App Engine
             except ImportError:
                 raise ImportError("Can't load a json library")
-
     return json
 
 def list_to_csv(item_list):
@@ -55,5 +52,5 @@ def list_to_csv(item_list):
         return ','.join([str(i) for i in item_list])
 
 def urlencode_noplus(query):
-    return '&'.join(['%s=%s' % (quote(str(k), ''), quote(str(v), '')) \
+    return '&'.join(['%s=%s' % (quote(str(k), ''), quote(str(v), ''))
         for k, v in query.iteritems()])

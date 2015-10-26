@@ -62,9 +62,7 @@ class CursorIterator(BaseIterator):
     def next(self):
         if self.next_cursor == 0 or (self.limit and self.num_tweets == self.limit):
             raise StopIteration
-        data, cursors = self.method(
-                cursor=self.next_cursor, *self.args, **self.kargs
-        )
+        data, cursors = self.method(cursor=self.next_cursor, *self.args, **self.kargs)
         self.prev_cursor, self.next_cursor = cursors
         if len(data) == 0:
             raise StopIteration

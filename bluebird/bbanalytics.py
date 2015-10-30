@@ -216,7 +216,8 @@ def extract_url_from_tweet(t = ""):
     q = t.split(" ")
     for word in q:
         if "http" in word and len(word) > 18:
-            return word
+            http_from = word.index('http')
+            return word[http_from:]
     return None
 
 def get_matching_keywords(text=''):

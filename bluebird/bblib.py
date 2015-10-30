@@ -13,7 +13,7 @@ import os.path
 import random
 import lxml.html
 import pymongo
-
+import operator
 
 # Make config file available in this module
 cfg = None
@@ -314,6 +314,7 @@ class BuildText(object):
         f.close()
         return
 
+
     def build_text(self, url):
         """
         take in a URL and build a tweet around it. use preambles and hashtags from random
@@ -330,14 +331,17 @@ class BuildText(object):
             return None, 0
         # add hashtags until tweet length is full
         score = bbanalytics.score_tweets(text)
-        help_hashtags = []
+        hashtag_candidates = bbanalytics.get_matching_keywords(text)
+        sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
         for i in xrange(3):
             old_text = "%s" % text
-            hashtag = random.choice(self.hashtags)
-            if hashtag in help_hashtags:
-                continue
-            help_hashtags.append(hashtag)
-            text += " " + hashtag
+            try:
+                hashtag = sorted_hts[i]
+                print 'Building Tweet', hashtag,i
+                text += " " + hashtag[0]
+            except IndexError:
+                logr.error('Building tweet failed')
+
             if len(text) > 140:
                 text = old_text
                 break

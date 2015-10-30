@@ -8,7 +8,7 @@ logr = logging.getLogger("logger")
 cfg = None
 languages = []
 locations = []
-keywords = []
+keywords = None
 blacklist = {}
 
 
@@ -219,6 +219,13 @@ def extract_url_from_tweet(t = ""):
             return word
     return None
 
+def get_matching_keywords(text=''):
+    '''return a dictrionary that contains the keywords with weights that match a given text'''
+    result = {}
+    for word in keywords:
+        if word in text and word not in result:
+            result[word] = keywords[word]
+    return result
 
 class CosineStringSimilarity(object):
     def __init__(self):

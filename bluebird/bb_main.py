@@ -44,10 +44,11 @@ class ManageUpdatesPerDay(object):
         if self.use_timer:
             self.timer[bbl.get_today()] = time.time() + min(nr.exponential(24 * 60 * 60. / self.max_updates),
                                                             2 * 60 * 60)
+        return
 
     @staticmethod
     def clean_dict(d):
-        for key in d:
+        for key in d.keys():
             if not key == bbl.get_today():
                 del d[key]
 
@@ -121,10 +122,16 @@ def follow_management(t, ca, api):
             pass
     ca.increase_count()
     bbl.ca_save_state(ca, "follows")
+    wait = int(nr.rand() * 100)
+    print "Waiting seconds: ", wait
+    time.sleep(wait)
     return True
 
 
 class TweetBuffer(object):
+    """
+    This Object is used for Retweet, Favorite and Follow management
+    """
     def __init__(self, ca, api, management_fct, delta_time, max_number_actions=3):
         self.buffer = []
         self.ca = ca
@@ -136,7 +143,8 @@ class TweetBuffer(object):
         logr.info("initiate tweet buffer")
 
     def add_to_buffer(self, t, score):
-        if bba.minutes_of_day() % self.delta_time == 0:
+        # Check if something in Buffer and if yes flush the buffer, else append to buffer
+        if self.buffer and bba.minutes_of_day() % self.delta_time == 0:
             self.flush_buffer()
             self.buffer = []
         else:
@@ -224,41 +232,44 @@ class FavListener(tweepy.StreamListener):
         score = bba.score_tweets(t.text, verbose=verbose)
         # Manage Favorites
         if score >= cfg.favorite_score:
-            if self.CSim.tweets_similar_list(t.text, self.ca_recent_f.get_list()):
-                logr.info("favoriteprevented2similar;%s" % t.id)
-                return True
-            self.tbuffer_fav.add_to_buffer(t, score)
-            self.ca_recent_f.add(t.text, auto_increase=True)
+            if not self.CSim.tweets_similar_list(t.text, self.ca_recent_f.get_list()):
+                self.tbuffer_fav.add_to_buffer(t, score)
+                self.ca_recent_f.add(t.text, auto_increase=True)
+            else:
+                #logr.info("favoriteprevented2similar;%s" % t.id)
+                pass
         # Manage Status Updates
         if score >= cfg.status_update_score:
+            update_candidate = False
             url = bba.extract_url_from_tweet(t.text)
             if url:
                 # return text and score from generated text. If no text is generated, TextBuilder will return 0 as score
                 text, score2 = TextBuilder.build_text(url)
                 # check if score2 also fulfills the score criteria
-                if score2 < cfg.status_update_score:
-                    return True
+                if score2 > cfg.status_update_score:
+                    update_candidate = True
                 # in case the text retrieved from the headline contains negative or
                 # forbidden keywords, don't send the update
-                if text:  # in some cases, text may be None.
+                if update_candidate and text:  # in some cases, text may be None.
                     if bba.score_tweets(text, verbose=verbose) < cfg.status_update_score:
-                        return True
+                        update_candidate = False
                     # Introduce some randomness such that not everything is automatically posted
-                    if text and random.random() < cfg.status_update_prob:
+                    if update_candidate and text and random.random() < cfg.status_update_prob:
                         if not ManageUpdatesPerDay.max_reached():
                             bbl.update_status(text=text, api=self.api, score=score)
                             ManageUpdatesPerDay.add_update()
                         else:
                             logr.info("$$MaxStatusUpdateMaxPerDayReached;%d;%s" % (score, text))
                     elif text:
-                        logr.info("$$MissedStatusUpdateRejectedByRandom;%d;%s" % (score, text))
-        # Manage Retweetssour
+                        logr.info("$$MissedStatusUpdateRejectedByRandomOrTextScore;%d;%s" % (score, text))
+        # Manage Retweets
         if score >= cfg.retweet_score:
-            if self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
-                logr.info("retweetprevented2similar;%s" % t.id)
-                return True
-            self.tbuffer_rt.add_to_buffer(t, score)
-            self.ca_recent_r.add(t.text, auto_increase=True)
+            if not self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
+                self.tbuffer_rt.add_to_buffer(t, score)
+                self.ca_recent_r.add(t.text, auto_increase=True)
+            else:
+                #logr.info("retweetprevented2similar;%s" % t.id)
+                pass
         # Manage Follows
         if score >= cfg.follow_score:
             # check with vars(cfg) if cfg contains follow_prob

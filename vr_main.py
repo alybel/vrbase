@@ -23,7 +23,8 @@ def start_account(account=""):
     print "starting account", account
     outfile = "/home/vr/valureach_ops/stdout/%s.out" % account
     with open(outfile, "w") as f:
-        subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout=f, stderr=f)
+#        subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout=f, stderr=f, shell=True)
+        subprocess.Popen("python bb_main.py -l%s" % account, stdout=f, stderr=f, shell=True)
     os.chdir("../")
     subprocess.call(["touch", "accounts/%s/.lock" % account])
     return True

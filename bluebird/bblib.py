@@ -13,6 +13,7 @@ import os.path
 import random
 import lxml.html
 import pymongo
+from urllib2 import urlopen
 
 
 # Make config file available in this module
@@ -284,7 +285,7 @@ class BuildText(object):
     def get_title_from_website(self, url):
         # noinspection PyUnusedLocal
         try:
-            t = lxml.html.parse(url)
+            t = lxml.html.parse(urlopen(url))
             text = t.find(".//title").text
             if not text:
                 raise Exception("No Text in Website")
@@ -300,6 +301,7 @@ class BuildText(object):
             else:
                 return None
         except Exception, e:
+            logr.error("in function get_title_from_website;%s" % e)
             return None
 
     @staticmethod

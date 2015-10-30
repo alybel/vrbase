@@ -42,8 +42,10 @@ class ManageUpdatesPerDay(object):
         self.clean_dict(self.timer)
         self.no_updates[bbl.get_today()] += 1
         if self.use_timer:
-            self.timer[bbl.get_today()] = time.time() + min(nr.exponential(24 * 60 * 60. / self.max_updates),
+            wait_time = time.time() + min(nr.exponential(24 * 60 * 60. / self.max_updates),
                                                             2 * 60 * 60)
+            self.timer[bbl.get_today()] = wait_time
+            logr.info('$$WaitingTime set to %s' % wait_time)
         return
 
     @staticmethod
@@ -248,11 +250,15 @@ class FavListener(tweepy.StreamListener):
                 # check if score2 also fulfills the score criteria
                 if score2 > cfg.status_update_score:
                     update_candidate = True
+                else:
+                    update_candidate = False
+                    logr.info("$$MissedStatusUpdateStatusScoreTooLow;%d;%s" % (score2, text))
                 # in case the text retrieved from the headline contains negative or
                 # forbidden keywords, don't send the update
                 if update_candidate and text:  # in some cases, text may be None.
                     if bba.score_tweets(text, verbose=verbose) < cfg.status_update_score:
                         update_candidate = False
+                        logr.info("$$MissedStatusUpdateStatusScoreTooLowStage2;%d;%s" % (score2, text))
                     # Introduce some randomness such that not everything is automatically posted
                     if update_candidate and text and random.random() < cfg.status_update_prob:
                         if not ManageUpdatesPerDay.max_reached():
@@ -262,7 +268,9 @@ class FavListener(tweepy.StreamListener):
                             logr.info("$$MaxStatusUpdateMaxPerDayReached;%d;%s" % (score, text))
                     elif text:
                         logr.info("$$MissedStatusUpdateRejectedByRandomOrTextScore;%d;%s" % (score, text))
-        # Manage Retweets
+                    else:
+                        logr.info("$$MissedStatusUpdateNoText;%d;%s" % (score, text))
+                        
         if score >= cfg.retweet_score:
             if not self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
                 self.tbuffer_rt.add_to_buffer(t, score)

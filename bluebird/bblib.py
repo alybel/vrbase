@@ -339,11 +339,9 @@ class BuildText(object):
             old_text = "%s" % text
             try:
                 hashtag = sorted_hts[i]
-                print 'Building Tweet', hashtag,i
-                text += " " + hashtag[0]
+                text += " #" + hashtag[0]
             except IndexError:
                 logr.error('Building tweet failed')
-
             if len(text) > 140:
                 text = old_text
                 break

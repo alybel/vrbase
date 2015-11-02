@@ -15,6 +15,7 @@ import lxml.html
 import pymongo
 from urllib2 import urlopen
 import operator
+from lxml import etree
 
 # Make config file available in this module
 cfg = None
@@ -278,11 +279,14 @@ class BuildText(object):
         self.hashtags = hashtags
         self.last_used_preamble = ""
         if os.path.isfile("last_title.sav"):
-            self.last_titles = self.load_last_titles()
+            try:
+                self.last_titles = self.load_last_titles()
+            except:
+                self.last_titles = CyclicArray(100)
         else:
             self.last_titles = CyclicArray(100)
 
-    def get_title_from_website(self, url):
+    def get_title_from_website(self, url, debug=False):
         # noinspection PyUnusedLocal
         try:
             t = lxml.html.parse(urlopen(url))
@@ -292,7 +296,7 @@ class BuildText(object):
             text = ru(text)
             if not text:
                 raise Exception("Text has wrong encoding")
-            if self.last_titles.isin(text):
+            if self.last_titles.isin(text) and not debug:
                 raise Exception("already twittered")
             if len(text) > 20:
                 self.last_titles.add(text, auto_increase=True)
@@ -316,6 +320,12 @@ class BuildText(object):
         f.close()
         return
 
+    @staticmethod
+    def read_ws(url):
+        ws = lxml.html.parse(urlopen(url))
+        result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
+        return result
+
 
     def build_text(self, url):
         """
@@ -324,7 +334,7 @@ class BuildText(object):
         """
         # choose preamble
         # build first part of text
-        title = self.get_title_from_website(url)
+        title = self.get_title_from_website(url, debug=True)
         if not title:
             return None, 0
         text = "%s %s" % (title, url)
@@ -332,9 +342,11 @@ class BuildText(object):
         if not text or len(text.split(" ")) < 3:
             return None, 0
         # add hashtags until tweet length is full
-        score = bbanalytics.score_tweets(text)
-        hashtag_candidates = bbanalytics.get_matching_keywords(text)
+        score = bbanalytics.score_tweets(self.read_ws(url), is_body=True)
+        hashtag_candidates = bbanalytics.get_matching_keywords(self.read_ws(url))
+        print hashtag_candidates
         sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
+        print sorted_hts
         for i in xrange(3):
             old_text = "%s" % text
             try:
@@ -469,7 +481,6 @@ def add_as_follower(t, api, verbose=False):
             print 'error'
             sys.exit()
         logr.error("in function add_as_follower;%s" % e)
-        sys.exit()
 
 
 def remove_follow(screen_name, api):

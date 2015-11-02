@@ -179,7 +179,7 @@ def eval_tweet2(t):
                 used_words.append(comb)
     return score
 
-def score_tweets(t="", verbose = False):
+def score_tweets(t="", verbose = False, is_body=False):
     """
     input the tweet text and receive a score
     :param: tweet text
@@ -190,7 +190,7 @@ def score_tweets(t="", verbose = False):
     t = split_and_clean_text(t)
     score = eval_tweet2(t)
     for word in t:
-        if word in blacklist:
+        if word in blacklist and not is_body:
             score -= blacklist[word]
             if verbose: print 'negative word',word
     if score >=0 and verbose:

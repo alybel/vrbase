@@ -19,7 +19,7 @@ from lxml import etree
 
 # Make config file available in this module
 cfg = None
-hdr = { 'User-Agent': 'this and that' }
+hdr = {'User-Agent': 'this and that'}
 
 class Session:
     pass

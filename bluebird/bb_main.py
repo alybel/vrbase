@@ -252,13 +252,13 @@ class FavListener(tweepy.StreamListener):
                     update_candidate = True
                 else:
                     update_candidate = False
-                    logr.info("$$MissedStatusUpdateStatusScoreTooLow;%d;%s" % (score2, text))
+                    logr.info("$$MissedStatusUpdateStatusScoreTooLow;%d;%s;%s" % (score2, text, url))
                 # in case the text retrieved from the headline contains negative or
                 # forbidden keywords, don't send the update
                 if update_candidate and text:  # in some cases, text may be None.
                     if bba.score_tweets(text, verbose=verbose) < cfg.status_update_score:
                         update_candidate = False
-                        logr.info("$$MissedStatusUpdateStatusScoreTooLowStage2;%d;%s" % (score2, text))
+                        logr.info("$$MissedStatusUpdateStatusScoreTooLowStage2;%d;%s;%s" % (score2, text, url))
                     # Introduce some randomness such that not everything is automatically posted
                     if update_candidate and text and random.random() < cfg.status_update_prob:
                         if not ManageUpdatesPerDay.max_reached():

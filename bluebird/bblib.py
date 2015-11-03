@@ -13,13 +13,13 @@ import os.path
 import random
 import lxml.html
 import pymongo
-from urllib2 import urlopen
+import urllib2
 import operator
 from lxml import etree
 
 # Make config file available in this module
 cfg = None
-
+hdr = { 'User-Agent': 'this and that' }
 
 class Session:
     pass
@@ -287,9 +287,10 @@ class BuildText(object):
             self.last_titles = CyclicArray(100)
 
     def get_title_from_website(self, url, debug=False):
-        # noinspection PyUnusedLocal
         try:
-            t = lxml.html.parse(urlopen(url))
+            req = urllib2.Request(url, headers=hdr)
+            html = urllib2.urlopen(req).read()
+            t = lxml.html.parse(html)
             text = t.find(".//title").text
             if not text:
                 raise Exception("No Text in Website")
@@ -322,7 +323,9 @@ class BuildText(object):
 
     @staticmethod
     def read_ws(url):
-        ws = lxml.html.parse(urlopen(url))
+        req = urllib2.Request(url, headers=hdr)
+        html = urllib2.urlopen(req).read()
+        ws = lxml.html.parse(html)
         result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
         return result
 

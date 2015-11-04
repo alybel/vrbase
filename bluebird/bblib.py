@@ -337,17 +337,23 @@ class BuildText(object):
         """
         # choose preamble
         # build first part of text
-        title = self.get_title_from_website(url, debug=True)
-        if not title:
+        try:
+            title = self.get_title_from_website(url, debug=True)
+        except UnicodeError:
+            title = None
+        if title is None:
             return None, 0
         text = "%s %s" % (title, url)
         # Title must exist an consist of at least 4 words
-        if not text or len(text.split(" ")) < 3:
+        if text is None or len(text.split(" ")) < 3:
             return None, 0
         # add hashtags until tweet length is full
-        score = bbanalytics.score_tweets(self.read_ws(url), is_body=True)
-        hashtag_candidates = bbanalytics.get_matching_keywords(self.read_ws(url))
-        print hashtag_candidates
+        try:
+            score = bbanalytics.score_tweets(self.read_ws(url), is_body=True)
+            hashtag_candidates = bbanalytics.get_matching_keywords(self.read_ws(url))
+        except UnicodeError:
+            score = -1
+            hashtag_candidates = []
         sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
         print sorted_hts
         for i in xrange(3):

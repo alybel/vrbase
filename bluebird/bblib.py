@@ -286,10 +286,8 @@ class BuildText(object):
         else:
             self.last_titles = CyclicArray(100)
 
-    def get_title_from_website(self, url, debug=False):
+    def get_title_from_website(self, html, debug=False):
         try:
-            req = urllib2.Request(url, headers=hdr)
-            html = urllib2.urlopen(req).read()
             t = lxml.html.parse(html)
             text = t.find(".//title").text
             if not text:
@@ -322,9 +320,13 @@ class BuildText(object):
         return
 
     @staticmethod
-    def read_ws(url):
+    def get_ws_html(url):
         req = urllib2.Request(url, headers=hdr)
         html = urllib2.urlopen(req).read()
+        return html
+
+    @staticmethod
+    def read_ws(html):
         ws = lxml.html.parse(html)
         result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
         return result
@@ -337,8 +339,11 @@ class BuildText(object):
         """
         # choose preamble
         # build first part of text
+
+        html = self.get_ws_html(url)
+
         try:
-            title = self.get_title_from_website(url, debug=True)
+            title = self.get_title_from_website(html, debug=True)
         except UnicodeError:
             title = None
         if title is None:
@@ -349,8 +354,8 @@ class BuildText(object):
             return None, 0
         # add hashtags until tweet length is full
         try:
-            score = bbanalytics.score_tweets(self.read_ws(url), is_body=True)
-            hashtag_candidates = bbanalytics.get_matching_keywords(self.read_ws(url))
+            score = bbanalytics.score_tweets(self.read_ws(html), is_body=True)
+            hashtag_candidates = bbanalytics.get_matching_keywords(self.read_ws(html))
         except UnicodeError:
             score = -1
             hashtag_candidates = []

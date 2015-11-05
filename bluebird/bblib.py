@@ -339,9 +339,10 @@ class BuildText(object):
         """
         # choose preamble
         # build first part of text
-
-        html = self.get_ws_html(url)
-
+        try:
+            html = self.get_ws_html(url)
+        except Exception, e:
+            logr.error("in function get_ws_html;%s" % e)
         try:
             title = self.get_title_from_website(html, debug=True)
         except UnicodeError:

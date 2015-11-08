@@ -192,7 +192,7 @@ def ru(s=""):
     """
     if type(s) == type(1) or type(s) == type(9999999999999999):
         return s
-    return None if not s else s.encode('unicode', 'ignore')
+    return None if not s else s.encode('ascii', 'ignore')
 
 
 def get_first_level_content(data, key):

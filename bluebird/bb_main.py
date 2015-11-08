@@ -218,13 +218,17 @@ class FavListener(tweepy.StreamListener):
     def on_data(self, data):
         t = bbl.tweet2obj(data)
         # in case tweet cannot be put in object format just skip this tweet
-        if not t:
+
+        if t is None:
             return True
+
         if t.user_screen_name == cfg.own_twittername:
             return True
+
         # Filter Tweets for url in tweet, number hashtags, language and location as in configuration
         if not bba.filter_tweets(t):
             return True
+
         if "dump_read" in vars(cfg):
             if cfg.dump_read:
                 # logr.info("$$DUMP", t.text, t.user_screen_name, t.description, t.created, t.id)
@@ -233,6 +237,7 @@ class FavListener(tweepy.StreamListener):
         # add score if tweet is relevant
         score = bba.score_tweets(t.text, verbose=verbose)
         # Manage Favorites
+
         if score >= cfg.favorite_score:
             if not self.CSim.tweets_similar_list(t.text, self.ca_recent_f.get_list()):
                 self.tbuffer_fav.add_to_buffer(t, score)
@@ -241,12 +246,14 @@ class FavListener(tweepy.StreamListener):
                 #logr.info("favoriteprevented2similar;%s" % t.id)
                 pass
         # Manage Status Updates
+
         if score >= cfg.status_update_score:
-            update_candidate = False
             url = bba.extract_url_from_tweet(t.text)
             if url:
                 # return text and score from generated text. If no text is generated, TextBuilder will return 0 as score
+                print "get text and url"
                 text, score2 = TextBuilder.build_text(url)
+                print text
                 # check if score2 also fulfills the score criteria
                 if score2 > cfg.status_update_score:
                     update_candidate = True

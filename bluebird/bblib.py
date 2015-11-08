@@ -16,6 +16,9 @@ import pymongo
 import urllib2
 import operator
 from lxml import etree
+from bs4 import UnicodeDammit
+from io import StringIO
+
 
 # Make config file available in this module
 cfg = None
@@ -189,7 +192,7 @@ def ru(s=""):
     """
     if type(s) == type(1) or type(s) == type(9999999999999999):
         return s
-    return None if not s else s.encode('ascii', 'ignore')
+    return None if not s else s.encode('unicode', 'ignore')
 
 
 def get_first_level_content(data, key):
@@ -288,11 +291,10 @@ class BuildText(object):
 
     def get_title_from_website(self, html, debug=False):
         try:
-            t = lxml.html.parse(html)
+            t = lxml.html.parse(StringIO(html))
             text = t.find(".//title").text
             if not text:
                 raise Exception("No Text in Website")
-            text = ru(text)
             if not text:
                 raise Exception("Text has wrong encoding")
             if self.last_titles.isin(text) and not debug:
@@ -327,6 +329,10 @@ class BuildText(object):
         except Exception, e:
             logr.error("in function get_ws_html;%s" % e)
             return None
+        #dammit = UnicodeDammit(html)
+        #print 'dammit'
+        #html = dammit.unicode_markup
+        html = unicode(html, 'utf-8')
         return html
 
     @staticmethod
@@ -350,6 +356,7 @@ class BuildText(object):
         try:
             title = self.get_title_from_website(html, debug=True)
         except UnicodeError:
+            logr.error("UnicodeError in  get_title_from_website;%s" % e)
             title = None
         if title is None:
             return None, 0

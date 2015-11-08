@@ -306,7 +306,7 @@ class BuildText(object):
             else:
                 return None
         except Exception, e:
-            logr.error("in function get_title_from_website;%s" % e)
+            logr.error("in function get_title_from_website;%s" % e.replace('\n', '<lb>')[:100])
             return None
 
     @staticmethod
@@ -327,17 +327,21 @@ class BuildText(object):
         try:
             html = urllib2.urlopen(req).read()
         except Exception, e:
-            logr.error("in function get_ws_html;%s" % e)
+            logr.error("in function get_ws_html;%s" % e.replace('\n', '<lb>')[:100])
             return None
         #dammit = UnicodeDammit(html)
         #print 'dammit'
         #html = dammit.unicode_markup
-        html = unicode(html, 'utf-8')
+        html = unicode(html, errors='ignore')
         return html
 
     @staticmethod
     def read_ws(html):
-        ws = lxml.html.parse(html)
+        try:
+            ws = lxml.html.parse(html)
+        except IOError:
+            logr.error('in function read_ws, IOError')
+            return ''
         result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
         return result
 

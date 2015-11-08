@@ -322,7 +322,11 @@ class BuildText(object):
     @staticmethod
     def get_ws_html(url):
         req = urllib2.Request(url, headers=hdr)
-        html = urllib2.urlopen(req).read()
+        try:
+            html = urllib2.urlopen(req).read()
+        except Exception, e:
+            logr.error("in function get_ws_html;%s" % e)
+            return None
         return html
 
     @staticmethod
@@ -339,10 +343,10 @@ class BuildText(object):
         """
         # choose preamble
         # build first part of text
-        try:
-            html = self.get_ws_html(url)
-        except Exception, e:
-            logr.error("in function get_ws_html;%s" % e)
+
+        html = self.get_ws_html(url)
+        if html is None:
+            return None, 0
         try:
             title = self.get_title_from_website(html, debug=True)
         except UnicodeError:

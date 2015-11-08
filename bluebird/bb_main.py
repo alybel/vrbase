@@ -287,7 +287,7 @@ class FavListener(tweepy.StreamListener):
             # Check if the person to follow has been already followed in the past X days.
             # In this case, do not follow again until this period is over.
             if int(t.user_id) in recent_follows:
-                logr.info("refollowprevented;%s" % t.user_id)
+                #logr.info("refollowprevented;%s" % t.user_id)
                 return True
             self.tbuffer.add_to_buffer(t, score)
         return True

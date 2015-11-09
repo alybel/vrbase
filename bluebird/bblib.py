@@ -290,23 +290,26 @@ class BuildText(object):
             self.last_titles = CyclicArray(100)
 
     def get_title_from_website(self, html, debug=False):
-        try:
-            t = lxml.html.parse(StringIO(html))
-            text = t.find(".//title").text
-            if not text:
-                raise Exception("No Text in Website")
-            if not text:
-                raise Exception("Text has wrong encoding")
-            if self.last_titles.isin(text) and not debug:
-                raise Exception("already twittered")
-            if len(text) > 20:
+        t = lxml.html.parse(StringIO(html))
+        if t is None:
+            return None
+        obj = t.find(".//title")
+        if obj is None:
+            return None
+        text = obj.text
+        if not text:
+            raise Exception("No Text in Website")
+        if not text:
+            raise Exception("Text has wrong encoding")
+        if self.last_titles.isin(text) and not debug:
+            logr.info('already_twittered')
+            return None
+        if len(text) > 20:
+            if not debug:
                 self.last_titles.add(text, auto_increase=True)
                 self.update_last_titles(self.last_titles)
-                return text
-            else:
-                return None
-        except Exception, e:
-            logr.error("in function get_title_from_website")
+            return text
+        else:
             return None
 
     @staticmethod
@@ -338,15 +341,16 @@ class BuildText(object):
     @staticmethod
     def read_ws(html):
         try:
-            ws = lxml.html.parse(html)
-        except IOError:
+            ws = lxml.html.parse(StringIO(html))
+        except IOError, e:
+            print e
             logr.error('in function read_ws, IOError')
             return ''
         result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
         return result
 
 
-    def build_text(self, url):
+    def build_text(self, url, debug=False):
         """
         take in a URL and build a tweet around it. use preambles and hashtags from random
         choice but make sure not to repeat the last one.
@@ -358,7 +362,7 @@ class BuildText(object):
         if html is None:
             return None, 0
         try:
-            title = self.get_title_from_website(html, debug=True)
+            title = self.get_title_from_website(html, debug=debug)
         except UnicodeError:
             logr.error("UnicodeError in  get_title_from_website;%s" % e)
             title = None
@@ -373,10 +377,10 @@ class BuildText(object):
             score = bbanalytics.score_tweets(self.read_ws(html), is_body=True)
             hashtag_candidates = bbanalytics.get_matching_keywords(self.read_ws(html))
         except UnicodeError:
+            print 'unicode error'
             score = -1
             hashtag_candidates = []
         sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
-        print sorted_hts
         for i in xrange(3):
             old_text = "%s" % text
             try:

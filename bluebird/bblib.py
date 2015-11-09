@@ -298,9 +298,11 @@ class BuildText(object):
             return None
         text = obj.text
         if not text:
-            raise Exception("No Text in Website")
+            logr.error("No Text in Website")
+            return None
         if not text:
-            raise Exception("Text has wrong encoding")
+            logr.error("Text has wrong encoding")
+            return None
         if self.last_titles.isin(text) and not debug:
             logr.info('already_twittered')
             return None

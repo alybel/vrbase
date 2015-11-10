@@ -297,7 +297,11 @@ class BuildText(object):
             return None
         if t is None:
             return None
-        obj = t.find(".//title")
+        try:
+            obj = t.find(".//title")
+            logr.error("in get_title_from_website, no title found")
+        except:
+            return None
         if obj is None:
             return None
         text = obj.text
@@ -409,7 +413,6 @@ def update_status(text, api, score):
             print "Text Too Long!"
         return None
     try:
-        # noinspection PyUnusedLocal
         status = api.update_status(text)
     except tweepy.error.TweepError, e:
         logr.error("in function bblib:update_status;%s" % e)

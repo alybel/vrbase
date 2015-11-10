@@ -290,7 +290,11 @@ class BuildText(object):
             self.last_titles = CyclicArray(100)
 
     def get_title_from_website(self, html, debug=False):
-        t = lxml.html.parse(StringIO(html))
+        try:
+            t = lxml.html.parse(StringIO(html))
+        except:
+            logr.error("in get_title_from_website, lxml.html fails")
+            return None
         if t is None:
             return None
         obj = t.find(".//title")
@@ -298,20 +302,22 @@ class BuildText(object):
             return None
         text = obj.text
         if not text:
-            logr.error("No Text in Website")
+            logr.error("in get_title_from_website No Text in Website")
             return None
         if not text:
-            logr.error("Text has wrong encoding")
+            logr.error("in get_title_from_website Text has wrong encoding")
             return None
         if self.last_titles.isin(text) and not debug:
-            logr.info('already_twittered')
+            logr.info('in get_title_from_website already_twittered')
             return None
         if len(text) > 20:
             if not debug:
                 self.last_titles.add(text, auto_increase=True)
                 self.update_last_titles(self.last_titles)
+            logr.info('in get_title_from_website success')
             return text
         else:
+            logr.info('in get_title_from_website failure')
             return None
 
     @staticmethod
@@ -344,9 +350,8 @@ class BuildText(object):
     def read_ws(html):
         try:
             ws = lxml.html.parse(StringIO(html))
-        except IOError, e:
-            print e
-            logr.error('in function read_ws, IOError')
+        except:
+            logr.error('in function read_ws')
             return ''
         result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
         return result

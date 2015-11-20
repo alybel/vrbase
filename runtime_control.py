@@ -79,7 +79,7 @@ def state_changed(account):
 
 def put_state_in_action(account):
     if account['onoff'] == 1:
-        start_or_restart_account()account(account)
+        start_or_restart_account(account)
     else:
         stop_account(account)
 

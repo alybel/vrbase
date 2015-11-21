@@ -11,6 +11,7 @@ import httplib
 import collections
 import time
 import numpy.random as nr
+import load_config
 
 import tweepy
 
@@ -311,15 +312,20 @@ if __name__ == "__main__":
 
     account_path = "../accounts/%s/" % sysargs.location
     print account_path
-    sys.path.append(account_path)
+    
+    #ToDo properly catch cases where no db entry was found
     try:
-        # Here, decide if you want to use the config from file or load from database
-        import config as cfg
-        # cfg = load_config.load_config(args.location)
-    except ImportError:
-        cfg = None
-        print "Account %s does not exist" % sysargs.location
-        sys.exit(0)
+        # Try to load from database
+        cfg = load_config.load_config(sysargs.location)
+        load_config.check_if_folder_exists_or_create(cfg)
+    except AttributeError: #Bad method of checking this
+        #No database entry found
+        try:
+            sys.path.append(account_path)
+            import config as cfg
+        except:
+            print "Account %s does not exist" % sysargs.location
+            sys.exit(0)
     print cfg.keywords
     if cfg.own_twittername != sysargs.location:
         print "serious error in starting: Twittername not same as account folder name!"

@@ -92,9 +92,15 @@ def reset_restart_needed(account):
     session.commit()
     return True
 
+def get_current_states():
+    """ pull in the actual states of all services """
+    #ToDo finish this function
+    pass
 
 while True:
     accounts = pull_data()
+    get_current_states()
+    #ToDo also pull in all actual states of each service
     for account_name in accounts:
         acc = accounts[account_name]
         # Case 1: Account is put on pause. There are no exceptions to this. Check if account is paused otherwise

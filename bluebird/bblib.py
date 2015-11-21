@@ -299,8 +299,8 @@ class BuildText(object):
             return None
         try:
             obj = t.find(".//title")
-            logr.error("in get_title_from_website, no title found")
         except:
+            logr.error("in get_title_from_website, no title found")
             return None
         if obj is None:
             return None
@@ -344,9 +344,6 @@ class BuildText(object):
         except Exception, e:
             logr.error("in function get_ws_html")
             return None
-        #dammit = UnicodeDammit(html)
-        #print 'dammit'
-        #html = dammit.unicode_markup
         html = unicode(html, errors='ignore')
         return html
 
@@ -359,7 +356,6 @@ class BuildText(object):
             return ''
         result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
         return result
-
 
     def build_text(self, url, debug=False):
         """

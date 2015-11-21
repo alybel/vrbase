@@ -4,6 +4,8 @@ from collections import Counter
 import datetime
 import logging
 logr = logging.getLogger("logger")
+import nltk
+from nltk.util import ngrams
 
 cfg = None
 languages = []
@@ -223,9 +225,14 @@ def extract_url_from_tweet(t = ""):
 def get_matching_keywords(text=''):
     '''return a dictrionary that contains the keywords with weights that match a given text'''
     result = {}
+    print keywords
+    token = nltk.word_tokenize(text)
     for word in keywords:
-        if word in text and word not in result:
+        if word in token and word not in result:
             result[word] = keywords[word]
+        for w1, w2 in ngrams(token,2):
+            if w1 + w2 == word and word not in result:
+                result[word] = keywords[word]
     return result
 
 class CosineStringSimilarity(object):

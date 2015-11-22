@@ -33,6 +33,7 @@ def load_config(own_twittername=''):
     cfg.hashtags = []
     cfg.activity_frequency = 15
     cfg.number_hashtags = 3
+    cfg.status_update_prob = 0.5
     print 'loaded config from database'
     return cfg
 

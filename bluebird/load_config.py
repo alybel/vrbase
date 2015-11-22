@@ -32,8 +32,8 @@ def load_config(own_twittername=''):
     cfg.blacklist = dict(s.query(bl.c.keyword, bl.c.weight).filter(bl.c.fk_user_id == cfg.fk_user_id).all())
 
     # Accounts never unfollow
-    accounts_never_unfollow = s.query(na.c.accountname).filter(na.c.fk_user_id == cfg.fk_user_id).all()
-    cfg.accounts_never_unfollow = [x[0] for x in accounts_never_unfollow]
+    accounts_never_delete = s.query(na.c.accountname).filter(na.c.fk_user_id == cfg.fk_user_id).all()
+    cfg.accounts_never_delete = [x[0] for x in accounts_never_delete]
 
     cfg.verbose = False
     cfg.languages = ['en', 'de']

@@ -170,8 +170,9 @@ class TweetBuffer(object):
 
 
 class FavListener(tweepy.StreamListener):
-    self.action_counter = 0
+
     def __init__(self, api):
+        self.action_counter = 0
         tweepy.StreamListener.__init__(self)
         self.api = api
         # ca is a cyclic array that contains the tweet ID's there were favorited.

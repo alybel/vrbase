@@ -120,7 +120,7 @@ while True:
         # Case 2: fill states with new accounts and put their state in action
         if account_name not in states:
             put_state_in_action(acc)
-            time.pause(5)
+            time.sleep(5)
             update_all_states(acc)
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(acc) and is_set_to_restart(acc):
@@ -129,7 +129,7 @@ while True:
         # Case 4: State has changed, apply change.
         if state_changed(acc):
             put_state_in_action(acc)
-            time.pause(5)
+            time.sleep(5)
             update_all_states(acc)
     pr('heartbeat')
     sys.stdout.flush()

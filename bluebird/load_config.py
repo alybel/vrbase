@@ -24,8 +24,16 @@ def load_config(own_twittername=''):
     for key in row:
         setattr(cfg, key, row[key])
 
+    # Whitelist
     cfg.keywords = dict(s.query(wl.c.keyword, wl.c.weight).filter(wl.c.fk_user_id == cfg.fk_user_id).all())
+
+    # Blacklist
     cfg.blacklist = dict(s.query(bl.c.keyword, bl.c.weight).filter(bl.c.fk_user_id == cfg.fk_user_id).all())
+
+    # Accounts never unfollow
+    accounts_never_unfollow = s.query(na.c.accountname).filter(na.c.fk_user_id == cfg.fk_user_id).all()
+    cfg.accounts_never_unfollow = [x[0] for x in accounts_never_unfollow]
+
     cfg.verbose = False
     cfg.languages = ['en', 'de']
     cfg.locations = []

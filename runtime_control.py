@@ -3,6 +3,7 @@ import datetime
 import time
 import sys
 import subprocess
+import psutil
 
 __author__ = 'alex'
 
@@ -53,9 +54,9 @@ def is_paused(account):
         return True
     return False
 
-def check_if_off_or_switch_off(account):
-    # ToDo check is still needed
-    stop_account(account)
+def check_if_off_or_switch_off(account, running_accounts):
+    if account['twittername'] in running_accounts:
+        stop_account(account)
     pass
 
 def is_set_on(account):
@@ -68,10 +69,6 @@ def is_set_to_restart(account):
         return True
     return False
 
-
-def update_states(account):
-    states[account['twittername']] = account['onoff']
-
 def state_changed(account):
     if states[account['twittername']] != account['onoff']:
         return True
@@ -83,7 +80,6 @@ def put_state_in_action(account):
     else:
         stop_account(account)
 
-
 def reset_restart_needed(account):
     """reset the reset_needed information in the database"""
     session = Session()
@@ -92,26 +88,40 @@ def reset_restart_needed(account):
     session.commit()
     return True
 
-def get_current_states():
-    """ pull in the actual states of all services """
-    #ToDo finish this function
-    pass
+def get_running_accounts():
+    res = []
+    for proc in psutil.process_iter():
+        try:
+            pinfo = proc.cmdline()
+        except psutil.NoSuchProcess:
+            pass
+        else:
+            if len(pinfo) > 2 and 'bb_main' in pinfo[-2]:
+                res.append(pinfo[-1].lstrip('-l'))
+    return res
+
+def update_all_states(running_accounts):
+    for key in states.keys():
+        states[key] = 0
+    for acc in running_accounts:
+        states[acc] = 1
 
 while True:
     accounts = pull_data()
-    get_current_states()
-    #ToDo also pull in all actual states of each service
+    all_running_accounts = get_running_accounts()
+    update_all_states(all_running_accounts)
     for account_name in accounts:
         acc = accounts[account_name]
         # Case 1: Account is put on pause. There are no exceptions to this. Check if account is paused otherwise
         # pause it.
         if is_paused(acc):
-            check_if_off_or_switch_off(acc)
+            check_if_off_or_switch_off(acc, all_running_accounts)
             continue
-        # Case 2: fill_states_with_new_accounts and put their state in action
+        # Case 2: fill states with new accounts and put their state in action
         if account_name not in states:
             put_state_in_action(acc)
-            update_states(acc)
+            time.pause(5)
+            update_all_states(acc)
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(acc) and is_set_to_restart(acc):
             start_or_restart_account(acc)
@@ -119,7 +129,8 @@ while True:
         # Case 4: State has changed, apply change.
         if state_changed(acc):
             put_state_in_action(acc)
-            update_states(acc)
+            time.pause(5)
+            update_all_states(acc)
     pr('heartbeat')
     sys.stdout.flush()
     time.sleep(60)

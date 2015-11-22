@@ -74,11 +74,12 @@ def state_changed(account):
         return True
     return False
 
-def put_state_in_action(account):
+def put_state_in_action(account, running_accounts):
     if account['onoff'] == 1:
         start_or_restart_account(account)
     else:
-        stop_account(account)
+        if account['twittername'] in running_accounts:
+            stop_account(account)
 
 def reset_restart_needed(account):
     """reset the reset_needed information in the database"""
@@ -100,7 +101,9 @@ def get_running_accounts():
                 res.append(pinfo[-1].lstrip('-l'))
     return res
 
-def update_all_states(running_accounts):
+def update_all_states(running_accounts, accounts):
+    for acc in accounts:
+        states[acc['twittername']] = 0
     for key in states.keys():
         states[key] = 0
     for acc in running_accounts:
@@ -109,25 +112,30 @@ def update_all_states(running_accounts):
 while True:
     accounts = pull_data()
     all_running_accounts = get_running_accounts()
-    update_all_states(all_running_accounts)
+    update_all_states(all_running_accounts, accounts)
+    print states
     for account_name in accounts:
         acc = accounts[account_name]
         # Case 1: Account is put on pause. There are no exceptions to this. Check if account is paused otherwise
         # pause it.
         if is_paused(acc):
+            print 'case one'
             check_if_off_or_switch_off(acc, all_running_accounts)
             continue
         # Case 2: fill states with new accounts and put their state in action
         if account_name not in states:
-            put_state_in_action(acc)
+            print 'case 2'
+            put_state_in_action(acc, all_running_accounts)
             time.sleep(5)
             update_all_states(acc)
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(acc) and is_set_to_restart(acc):
+            print 'case 3'
             start_or_restart_account(acc)
             reset_restart_needed(acc)
         # Case 4: State has changed, apply change.
         if state_changed(acc):
+            print 'case 4'
             put_state_in_action(acc)
             time.sleep(5)
             update_all_states(acc)

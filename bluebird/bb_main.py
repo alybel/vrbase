@@ -170,6 +170,7 @@ class TweetBuffer(object):
 
 
 class FavListener(tweepy.StreamListener):
+    self.action_counter = 0
     def __init__(self, api):
         tweepy.StreamListener.__init__(self)
         self.api = api
@@ -219,7 +220,10 @@ class FavListener(tweepy.StreamListener):
     def on_data(self, data):
         t = bbl.tweet2obj(data)
         # in case tweet cannot be put in object format just skip this tweet
-
+        self.action_counter += 1
+        if self.action_counter > 200:
+            logr.info("$$ActionCounterAnother200")
+            self.action_counter = 0
         if t is None:
             return True
 

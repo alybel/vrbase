@@ -13,6 +13,7 @@ def load_config(own_twittername=''):
     gs = md.tables['GeneralSettings']
     bl = md.tables['BlacklistKeywords']
     wl = md.tables['WhitelistKeywords']
+    na = md.tables['NeverUnfollowAccounts']
 
     class cfg:
         pass

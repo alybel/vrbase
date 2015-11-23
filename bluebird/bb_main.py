@@ -286,6 +286,7 @@ class FavListener(tweepy.StreamListener):
             if not self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
                 self.tbuffer_rt.add_to_buffer(t, score)
                 self.ca_recent_r.add(t.text, auto_increase=True)
+                logr.info('$$Retweet;%d;%s' % (score, t))
             else:
                 #logr.info("retweetprevented2similar;%s" % t.id)
                 pass

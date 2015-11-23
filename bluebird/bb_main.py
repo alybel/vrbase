@@ -125,8 +125,8 @@ def follow_management(t, ca, api):
             pass
     ca.increase_count()
     bbl.ca_save_state(ca, "follows")
-    wait = int(nr.rand() * 100)
-    print "Waiting seconds after Follow: ", wait
+    wait = int(nr.rand() * 20)
+    logr.info('Waiting %d seconds after follow' % wait)
     time.sleep(wait)
     return True
 

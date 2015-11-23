@@ -31,6 +31,10 @@ def load_config(own_twittername=''):
     # Blacklist
     cfg.blacklist = dict(s.query(bl.c.keyword, bl.c.weight).filter(bl.c.fk_user_id == cfg.fk_user_id).all())
 
+    # Adjust keywords such that their sign has the correct direction and is in line with config files
+    for key in cfg.blacklist.keys():
+        cfg.blacklist[key] = -cfg.blacklist[key]
+
     # Accounts never unfollow
     accounts_never_delete = s.query(na.c.accountname).filter(na.c.fk_user_id == cfg.fk_user_id).all()
     cfg.accounts_never_delete = [x[0] for x in accounts_never_delete]

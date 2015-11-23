@@ -416,12 +416,12 @@ def update_status(text, api, score):
     return
 
 
-def retweet(identifier, api):
+def retweet(identifier,text, api):
     try:
         status = api.retweet(identifier)
         if cfg.verbose:
             print "retweeted"
-        logr.info("$$Retweet;%s;%s" % (identifier, status.id))
+        logr.info("$$Retweet;%s;%s;%s" % (identifier, status.id, text))
         return status.id
     except tweepy.error.TweepError, e:
         print e

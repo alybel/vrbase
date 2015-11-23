@@ -90,7 +90,7 @@ def retweet_management(t, ca, api):
     lp("Entering Retweet Management")
     if ca.isin(t.id):
         return False
-    rt_id = bbl.retweet(t.id, api)
+    rt_id = bbl.retweet(t.id, t.text, api)
     if not rt_id:
         return False
     ca.add(rt_id)
@@ -286,7 +286,7 @@ class FavListener(tweepy.StreamListener):
             if not self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
                 self.tbuffer_rt.add_to_buffer(t, score)
                 self.ca_recent_r.add(t.text, auto_increase=True)
-                logr.info('$$Retweet;%d;%s' % (score, t.text))
+                logr.info('$$CandidateRetweet;%d;%s' % (score, t.text))
             else:
                 #logr.info("retweetprevented2similar;%s" % t.id)
                 pass

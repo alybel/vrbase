@@ -20,6 +20,9 @@ def err_exception(line=""):
         return True
     if "TypeError" in line:
         return True
+    if '503' in line:
+        # twitter service overloaded, try again later
+        return True
 
 
 def run_monitoring():

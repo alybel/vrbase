@@ -225,7 +225,6 @@ def extract_url_from_tweet(t = ""):
 def get_matching_keywords(text=''):
     '''return a dictrionary that contains the keywords with weights that match a given text'''
     result = {}
-    print keywords
     token = nltk.word_tokenize(text)
     for word in keywords:
         if word in token and word not in result:

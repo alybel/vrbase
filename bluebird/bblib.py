@@ -14,6 +14,7 @@ import random
 import lxml.html
 import pymongo
 import urllib2
+import requests
 import operator
 from lxml import etree
 from bs4 import UnicodeDammit
@@ -338,9 +339,10 @@ class BuildText(object):
 
     @staticmethod
     def get_ws_html(url):
-        req = urllib2.Request(url, headers=hdr)
+        #req = urllib2.Request(url, headers=hdr)
         try:
-            html = urllib2.urlopen(req).read()
+            #html = urllib2.urlopen(req).read()
+            html = requests.get(url, timeout=1)
         except Exception, e:
             logr.error("in function get_ws_html")
             return None

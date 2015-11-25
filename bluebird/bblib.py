@@ -15,6 +15,7 @@ import lxml.html
 import pymongo
 import urllib2
 import requests
+from goose import Goose
 import operator
 from lxml import etree
 from bs4 import UnicodeDammit
@@ -282,6 +283,7 @@ class BuildText(object):
         self.preambles = preambles
         self.hashtags = hashtags
         self.last_used_preamble = ""
+        self.g = Goose()
         if os.path.isfile("last_title.sav"):
             try:
                 self.last_titles = self.load_last_titles()
@@ -366,15 +368,12 @@ class BuildText(object):
         """
         # choose preamble
         # build first part of text
-
-        html = self.get_ws_html(url)
-        if html is None:
-            return None, 0
         try:
-            title = self.get_title_from_website(html, debug=debug)
-        except UnicodeError:
-            logr.error("UnicodeError in  get_title_from_website;%s" % e)
-            title = None
+            article = self.g.extract(url)
+        except:
+            logr.info('Error in extracting article with goose in build_text')
+            return None, 0
+        title = article.title
         if title is None:
             return None, 0
         text = "%s %s" % (title, url)
@@ -383,8 +382,8 @@ class BuildText(object):
             return None, 0
         # add hashtags until tweet length is full
         try:
-            score = bbanalytics.score_tweets(self.read_ws(html), is_body=True)
-            hashtag_candidates = bbanalytics.get_matching_keywords(self.read_ws(html))
+            score = bbanalytics.score_tweets(article.cleaned_text, is_body=True)
+            hashtag_candidates = bbanalytics.get_matching_keywords(article.cleaned_text)
         except UnicodeError:
             print 'unicode error'
             score = -1

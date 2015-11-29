@@ -34,11 +34,12 @@ def start_account(account=""):
     return True
 
 
-def stop_account(account="", auto_call=False):
+def stop_account(account="", auto_call=False, remove_lock=True):
     vr_base = os.getenv('VR_BASE')
     procname = "bb_main.py"
-    subprocess.call(["rm", "%s/accounts/%s/.lock" % (vr_base, account)])
-    print "lockfile removed"
+    if remove_lock:
+        subprocess.call(["rm", "%s/accounts/%s/.lock" % (vr_base, account)])
+        print "lockfile removed"
     for proc in psutil.process_iter():
         try:
             cmdl = proc.cmdline()

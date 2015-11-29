@@ -29,6 +29,9 @@ vr_base = os.getenv('VR_BASE')
 def account_is_locked(account=None):
     return os.path.isfile('%s/accounts/%s/.lock' % (vr_base, account))
 
+def account_is_off(account=None):
+    return states[account]
+
 def pr(out=None):
     logging.info('%s;%s' % (datetime.datetime.now(), out))
 
@@ -151,7 +154,7 @@ while True:
             update_all_states(accounts)
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(acc) and is_set_to_restart(acc):
-            if account_is_locked(account_name):
+            if account_is_locked(account_name) and account_is_off(account_name):
                 pr('MAINTENANCE: Account ON and Up for restart but NOT RUNNING')
                 continue
             restart_account(acc)

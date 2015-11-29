@@ -128,7 +128,7 @@ while True:
     accounts = pull_data()
     all_running_accounts = get_running_accounts()
     update_all_states(accounts)
-    print states
+    pr(states)
     vr_base = os.getenv('VR_BASE')
     for account_name in accounts:
         acc = accounts[account_name]
@@ -154,5 +154,3 @@ while True:
     pr('heartbeat')
     sys.stdout.flush()
     time.sleep(10)
-
-#ToDo Write into LogFile not Stdout

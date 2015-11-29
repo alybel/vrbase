@@ -72,4 +72,3 @@ if __name__ == "__main__":
         time.sleep(10)
         run_monitoring()
         logging.info('heartbeat %s' % datetime.datetime.now())
-        sys.stdout.flush()

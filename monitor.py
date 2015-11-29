@@ -3,7 +3,6 @@ import vr_main
 import time
 import smtplib
 import datetime
-import sys
 import logging
 import os
 

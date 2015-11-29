@@ -5,6 +5,11 @@ import sys
 import subprocess
 import psutil
 import os
+import logging
+
+vr_base = os.getenv('VR_BASE')
+
+logging.basicConfig(filename='%s/../logs/runtime_control.txt' % vr_base, maxBytes=20000000, level=logging.DEBUG)
 
 __author__ = 'alex'
 
@@ -22,10 +27,10 @@ gs = md.tables['GeneralSettings']
 vr_base = os.getenv('VR_BASE')
 
 def account_is_locked(account=None):
-    return os.path.isfile('%s/accounts/%s/.lock' % vr_base)
+    return os.path.isfile('%s/accounts/%s/.lock' % (vr_base, account))
 
 def pr(out=None):
-    print datetime.datetime.now(), out
+    logging.info('%s;%s' % (datetime.datetime.now(), out))
 
 def start_or_restart_account(account=None):
     pr('restart account %s' % account['twittername'])

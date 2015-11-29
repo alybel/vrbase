@@ -1,5 +1,4 @@
 from sqlalchemy import schema, types, create_engine, orm
-import os.path
 import os
 
 def load_config(own_twittername=''):

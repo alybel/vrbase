@@ -52,7 +52,7 @@ def load_config(own_twittername=''):
     print 'loaded config from database'
     return cfg
 
-def check_if_folder_exists_or_create(cfg):
-    directory = '../accounts/%s' % cfg.own_twittername
+def check_if_folder_exists_or_create(twittername):
+    directory = '../accounts/%s' % twittername
     if not os.path.exists(directory):
         os.makedirs(directory)

@@ -324,7 +324,7 @@ if __name__ == "__main__":
     try:
         # Try to load from database
         cfg = load_config.load_config(sysargs.location)
-        load_config.check_if_folder_exists_or_create(cfg)
+        load_config.check_if_folder_exists_or_create(cfg.own_twittername)
     except AttributeError: #Bad method of checking this
         #No database entry found
         try:

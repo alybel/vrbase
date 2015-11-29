@@ -148,6 +148,6 @@ while True:
             update_all_states(accounts)
     pr('heartbeat')
     sys.stdout.flush()
-    time.sleep(60)
+    time.sleep(10)
 
 #ToDo Write into LogFile not Stdout

@@ -30,7 +30,8 @@ def account_is_locked(account=None):
     return os.path.isfile('%s/accounts/%s/.lock' % (vr_base, account))
 
 def account_is_off(account=None):
-    return states[account]
+    """returns true if account is off"""
+    return not states[account]
 
 def pr(out=None):
     logging.info('%s;%s' % (datetime.datetime.now(), out))

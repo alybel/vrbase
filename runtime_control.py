@@ -32,9 +32,15 @@ def account_is_locked(account=None):
 def pr(out=None):
     logging.info('%s;%s' % (datetime.datetime.now(), out))
 
-def start_or_restart_account(account=None):
+def restart_account(account=None):
     pr('restart account %s' % account['twittername'])
     subprocess.call(['python', '%s/vr_main.py' % vr_base, 'restart', '%s' % account['twittername']])
+
+
+def start_account(account=None):
+    pr('start account %s' % account['twittername'])
+    subprocess.call(['python', '%s/vr_main.py' % vr_base, 'start', '%s' % account['twittername']])
+
 
 def stop_account(account):
     pr('stop account %s' % account['twittername'])
@@ -87,7 +93,8 @@ def state_changed(account):
 
 def put_state_in_action(account, running_accounts):
     if account['onoff'] == 1:
-        start_or_restart_account(account)
+        # If account got killed or died, the .lock file will prevent the account from being restarted.
+        start_account(account)
     else:
         if account['twittername'] in running_accounts:
             stop_account(account)
@@ -144,7 +151,10 @@ while True:
             update_all_states(accounts)
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(acc) and is_set_to_restart(acc):
-            start_or_restart_account(acc)
+            if account_is_locked(account_name):
+                pr('MAINTENANCE: Account ON and Up for restart but NOT RUNNING')
+                continue
+            restart_account(acc)
             reset_restart_needed(acc)
         # Case 4: State has changed, apply change.
         if state_changed(acc):

@@ -8,7 +8,6 @@ import psutil
 
 vr_base_glob = os.getenv('VR_BASE')
 sys.path.append('%s/bluebird' % vr_base_glob)
-print vr_base_glob
 import load_config as lc
 
 

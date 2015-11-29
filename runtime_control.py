@@ -4,6 +4,7 @@ import time
 import sys
 import subprocess
 import psutil
+import os
 
 __author__ = 'alex'
 
@@ -18,16 +19,21 @@ gs = md.tables['GeneralSettings']
 
 # Account Control Functions
 
+vr_base = os.getenv('VR_BASE')
+
+def account_is_locked(account=None):
+    return os.path.isfile('%s/accounts/%s/.lock' % vr_base)
+
 def pr(out=None):
     print datetime.datetime.now(), out
 
 def start_or_restart_account(account=None):
     pr('restart account %s' % account['twittername'])
-    subprocess.call(['python', '/home/vr/valureach_ops/vr_main.py', 'restart', '%s' % account['twittername']])
+    subprocess.call(['python', '%s/vr_main.py', 'restart' % vr_base, '%s' % account['twittername']])
 
 def stop_account(account):
     pr('stop account %s' % account['twittername'])
-    subprocess.call(['python', '/home/vr/valureach_ops/vr_main.py', 'stop', '%s' % account['twittername']])
+    subprocess.call(['python', '%s/vr_main.py' % vr_base, 'stop', '%s' % account['twittername']])
 
 def result_to_accounts(result):
     accounts = {}
@@ -117,6 +123,8 @@ while True:
     accounts = pull_data()
     all_running_accounts = get_running_accounts()
     update_all_states(accounts)
+    print states
+    vr_base = os.getenv('VR_BASE')
     for account_name in accounts:
         acc = accounts[account_name]
         # Case 1: Account is put on pause. There are no exceptions to this. Check if account is paused otherwise

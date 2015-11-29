@@ -29,7 +29,7 @@ def pr(out=None):
 
 def start_or_restart_account(account=None):
     pr('restart account %s' % account['twittername'])
-    subprocess.call(['python', '%s/vr_main.py' % vr_base, 'restart' % vr_base, '%s' % account['twittername']])
+    subprocess.call(['python', '%s/vr_main.py' % vr_base, 'restart', '%s' % account['twittername']])
 
 def stop_account(account):
     pr('stop account %s' % account['twittername'])

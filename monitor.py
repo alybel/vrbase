@@ -57,7 +57,7 @@ def send_report(account_name):
     try:
         smtpObj = smtplib.SMTP('smtp.valureach.com', 25)
         smtpObj.sendmail(sender, receivers, message)
-    except SMTPException:
+    except smtplib.SMTPException:
         logfile.write('email could not be sent')
 
 if __name__ == "__main__":

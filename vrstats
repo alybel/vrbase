@@ -1,3 +1,3 @@
 #! /bin/bash
 
-ps aux | grep bb_main.py
+ps aux | grep 'python bb_main.py' 

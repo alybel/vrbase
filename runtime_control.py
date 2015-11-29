@@ -101,44 +101,43 @@ def get_running_accounts():
                 res.append(pinfo[-1].lstrip('-l'))
     return res
 
-def update_all_states(running_accounts, accounts):
+def update_all_states(accounts):
+    running_accounts = get_running_accounts()
+    # Take all accounts from database and fill with 0
     for acc in accounts:
-        states[acc['twittername']] = 0
+        states[acc] = 0
+    # Take all accounts from state and fill with zero
     for key in states.keys():
         states[key] = 0
+    # Only set the actually running accounts to one    
     for acc in running_accounts:
         states[acc] = 1
 
 while True:
     accounts = pull_data()
     all_running_accounts = get_running_accounts()
-    update_all_states(all_running_accounts, accounts)
-    print states
+    update_all_states(accounts)
     for account_name in accounts:
         acc = accounts[account_name]
         # Case 1: Account is put on pause. There are no exceptions to this. Check if account is paused otherwise
         # pause it.
         if is_paused(acc):
-            print 'case one'
             check_if_off_or_switch_off(acc, all_running_accounts)
             continue
         # Case 2: fill states with new accounts and put their state in action
         if account_name not in states:
-            print 'case 2'
             put_state_in_action(acc, all_running_accounts)
             time.sleep(5)
-            update_all_states(acc)
+            update_all_states(accounts)
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(acc) and is_set_to_restart(acc):
-            print 'case 3'
             start_or_restart_account(acc)
             reset_restart_needed(acc)
         # Case 4: State has changed, apply change.
         if state_changed(acc):
-            print 'case 4'
-            put_state_in_action(acc)
+            put_state_in_action(acc, all_running_accounts)
             time.sleep(5)
-            update_all_states(acc)
+            update_all_states(accounts)
     pr('heartbeat')
     sys.stdout.flush()
     time.sleep(60)

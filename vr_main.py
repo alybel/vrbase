@@ -5,6 +5,9 @@ import subprocess
 import os
 import sys
 import psutil
+sys.path.append('bluebird')
+import load_config as lc
+
 
 
 def get_accounts():
@@ -16,23 +19,25 @@ def get_accounts():
 
 
 def start_account(account=""):
-    if os.path.isfile("accounts/%s/.lock" % account):
+    vr_base = os.getenv('VR_BASE')
+    if os.path.isfile("%s/accounts/%s/.lock" % (vr_base, account)):
         print "Account", account, "is locked. is already running?"
         return False
-    os.chdir("bluebird/")
+    os.chdir("%s/bluebird/" % vr_base)
     print "starting account", account
-    outfile = "/home/vr/valureach_ops/stdout/%s.out" % account
+    lc.check_if_folder_exists_or_create(account)
+    outfile = "%s/stdout/%s.out" % (vr_base, account)
     with open(outfile, "w") as f:
-#        subprocess.Popen(["./bb_main.py", "-l%s" % account], stdout=f, stderr=f, shell=True)
         subprocess.Popen("python bb_main.py -l%s" % account, stdout=f, stderr=f, shell=True)
     os.chdir("../")
-    subprocess.call(["touch", "accounts/%s/.lock" % account])
+    subprocess.call(["touch", "%s/accounts/%s/.lock" % (vr_base, account)])
     return True
 
 
 def stop_account(account="", auto_call=False):
+    vr_base = os.getenv('VR_BASE')
     procname = "bb_main.py"
-    subprocess.call(["rm", "accounts/%s/.lock" % account])
+    subprocess.call(["rm", "%s/accounts/%s/.lock" % (vr_base, account)])
     print "lockfile removed"
     for proc in psutil.process_iter():
         try:
@@ -59,9 +64,10 @@ def run_vr():
 
 
 def remove_all_lockfiles():
+    vr_base = os.getenv('VR_BASE')
     accounts = get_accounts()
     for account in accounts:
-        subprocess.call(["rm", "accounts/%s/.lock" % account])
+        subprocess.call(["rm", "%s/accounts/%s/.lock" % (vr_base, account)])
     print "all lockfiles removed"
 
 

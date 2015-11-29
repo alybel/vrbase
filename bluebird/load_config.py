@@ -53,6 +53,6 @@ def load_config(own_twittername=''):
     return cfg
 
 def check_if_folder_exists_or_create(twittername):
-    directory = '../accounts/%s' % twittername
+    directory = '%s/accounts/%s' % (os.getenv('VR_BASE'), twittername)
     if not os.path.exists(directory):
         os.makedirs(directory)

@@ -5,8 +5,11 @@ import smtplib
 import datetime
 import sys
 import logging
+import os
 
-logging.basicConfig(filename='%s/../logs/monitor_log.txt', maxBytes=20000000)
+vr_base = os.getenv('VR_BASE')
+
+logging.basicConfig(filename='%s/../logs/monitor_log.txt' % vr_base, maxBytes=20000000)
 
 
 def account_name_from_path(path=""):
@@ -68,5 +71,5 @@ if __name__ == "__main__":
     while True:
         time.sleep(10)
         run_monitoring()
-        print 'heartbeat', datetime.datetime.now()
+        logging.info('heartbeat %s' % datetime.datetime.now())
         sys.stdout.flush()

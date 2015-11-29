@@ -88,6 +88,7 @@ if __name__ == "__main__":
             start_account(arg2)
     elif arg1 == "stop":
         if arg2 == "all":
+            raise DeprecationWarning
             subprocess.call(["killall", "bb_main.py"])
             subprocess.call(["killall", "bb_main.py"])
             remove_all_lockfiles()
@@ -97,6 +98,7 @@ if __name__ == "__main__":
             stop_account(arg2)
     elif arg1 == "restart":
         if arg2 == "all":
+            raise DeprecationWarning
             subprocess.call(["killall", "bb_main.py"])
             subprocess.call(["killall", "bb_main.py"])
             remove_all_lockfiles()

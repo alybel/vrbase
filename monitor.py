@@ -35,7 +35,7 @@ def run_monitoring():
                         continue
                     account_name = account_name_from_path(fn)
                     # Only print something if a process exists. Otherwise produce no printout"
-                    result = vr_main.stop_account(account_name, auto_call=True, remove_lock = False)
+                    result = vr_main.stop_account(account_name, auto_call=True, remove_lock=False)
                     if result:
                         send_report(account_name)
                         with open("/home/vr/logs/monitoring_logfile.txt", "a") as logfile:
@@ -58,6 +58,8 @@ def send_report(account_name):
         smtpObj = smtplib.SMTP('smtp.valureach.com', 25)
         smtpObj.sendmail(sender, receivers, message)
     except smtplib.SMTPException:
+        logfile.write('email could not be sent')
+    except:
         logfile.write('email could not be sent')
 
 if __name__ == "__main__":

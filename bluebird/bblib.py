@@ -259,7 +259,7 @@ def add_favorite(identifier, api):
         return True
     except tweepy.error.TweepError, e:
         logr.info("FavoriteDenied;%s" % identifier)
-        logr.error("in function add_favorite; %s" % e)
+        logr.info("in function add_favorite; %s" % e)
         print e[0]
 
 
@@ -294,23 +294,23 @@ class BuildText(object):
         try:
             t = lxml.html.parse(StringIO(html))
         except:
-            logr.error("in get_title_from_website, lxml.html fails")
+            logr.info("in get_title_from_website, lxml.html fails")
             return None
         if t is None:
             return None
         try:
             obj = t.find(".//title")
         except:
-            logr.error("in get_title_from_website, no title found")
+            logr.info("in get_title_from_website, no title found")
             return None
         if obj is None:
             return None
         text = obj.text
         if not text:
-            logr.error("in get_title_from_website No Text in Website")
+            logr.info("in get_title_from_website No Text in Website")
             return None
         if not text:
-            logr.error("in get_title_from_website Text has wrong encoding")
+            logr.info("in get_title_from_website Text has wrong encoding")
             return None
         if self.last_titles.isin(text) and not debug:
             logr.info('in get_title_from_website already_twittered')
@@ -344,7 +344,7 @@ class BuildText(object):
             #html = urllib2.urlopen(req).read()
             html = requests.get(url, timeout=1)
         except Exception, e:
-            logr.error("in function get_ws_html")
+            logr.info("in function get_ws_html")
             return None
         html = unicode(html, errors='ignore')
         return html
@@ -354,7 +354,7 @@ class BuildText(object):
         try:
             ws = lxml.html.parse(StringIO(html))
         except:
-            logr.error('in function read_ws')
+            logr.info('in function read_ws')
             return ''
         result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
         return result
@@ -369,7 +369,7 @@ class BuildText(object):
         try:
             article = self.g.extract(url)
         except:
-            logr.info('Error in extracting article with goose in build_text')
+            logr.info('Failed to extracting article with goose in build_text')
             return None, 0
         title = article.title
         if title is None:
@@ -393,7 +393,7 @@ class BuildText(object):
                 hashtag = sorted_hts[i]
                 text += " #" + hashtag[0]
             except IndexError:
-                logr.error('Building tweet failed')
+                logr.info('Building tweet failed')
             if len(text) > 140:
                 text = old_text
                 break
@@ -410,7 +410,7 @@ def update_status(text, api, score):
     try:
         status = api.update_status(text)
     except tweepy.error.TweepError, e:
-        logr.error("in function bblib:update_status;%s" % e)
+        logr.info("Failure in function bblib:update_status;%s" % e)
     logr.info("$$StatusUpdate;%d;%s" % (score, text))
     return
 
@@ -425,7 +425,7 @@ def retweet(identifier,text, api):
     except tweepy.error.TweepError, e:
         print e
         logr.info("RetweetDenied;%s" % identifier)
-        logr.error("in function bblib:retweet;%s" % e)
+        logr.info("failure in function bblib:retweet;%s" % e)
         return False
 
 
@@ -437,7 +437,7 @@ def remove_retweet(identifier, api):
     except tweepy.error.TweepError, e:
         print e
         logr.info("RetweetDestroyDenied;%s" % identifier)
-        logr.error("in function: remove retweet; %s" % e)
+        logr.failure("in function: remove retweet; %s" % e)
         return False
 
 
@@ -538,7 +538,7 @@ def remove_follow(screen_name, api):
         logr.info("destroyedfriendship;%s", screen_name)
     except tweepy.error.TweepError, e:
         print e
-        logr.error("in function remove_follow; %s" % e)
+        logr.info("failure in function remove_follow; %s" % e)
 
 
 def get_statuses(api, username=None):
@@ -651,7 +651,7 @@ class UpdateUserInfo(object):
                 upsert=True)
             print "updated", info.id
         except Exception, e:
-            logr.error("in function update_info_in_mongodb; %s" % e)
+            logr.info("in function update_info_in_mongodb; %s" % e)
 
     def update_user_info(self, n=10):
         """

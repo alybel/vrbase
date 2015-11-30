@@ -13,12 +13,10 @@ import os.path
 import random
 import lxml.html
 import pymongo
-import urllib2
 import requests
 from goose import Goose
 import operator
 from lxml import etree
-from bs4 import UnicodeDammit
 from io import StringIO
 
 

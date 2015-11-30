@@ -43,7 +43,7 @@ def run_monitoring():
                     result = vr_main.stop_account(account_name, auto_call=True, remove_lock=False)
                     if result:
                         send_report(account_name)
-                    logging.info("%s;%s;%s \n" % (str(time.ctime(time.time())), "accountkilled", account_name))
+                    logging.info("%s;%s;%s;%s \n" % (str(time.ctime(time.time())), "accountkilled", account_name, line))
 
 
 def send_report(account_name):

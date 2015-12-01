@@ -374,7 +374,7 @@ if __name__ == "__main__":
             logging.shutdown()
             sys.exit()
         except httplib.IncompleteRead, e:
-            logr.error("in main function; %s" % e)
+            logr.info("in main function; %s" % e)
         except Exception, e:
             logr.error("in main function; %s" % e)
             print "Exception in user code:"

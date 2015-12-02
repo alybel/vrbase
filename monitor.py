@@ -8,7 +8,7 @@ import os
 
 vr_base = os.getenv('VR_BASE')
 
-logging.basicConfig(filename='%s/../logs/monitor_log.txt' % vr_base, maxBytes=20000000, level=logging.DEBUG)
+logging.basicConfig(filename='%s/../logs/monitor_log.txt' % vr_base, maxBytes=20000000, level=logging.INFO)
 
 
 def account_name_from_path(path=""):

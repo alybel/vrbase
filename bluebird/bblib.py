@@ -720,7 +720,7 @@ def get_recent_follows(days=50):
     today = datetime.date.today()
     begin_date = today - datetime.timedelta(days=days)
     res = []
-    logfile = "../accounts/%s/bluebird.log" % (cfg.own_twittername if cfg else "AlexanderD_Beck")
+    logfile = "../accounts/%s/bluebird.log" % cfg.own_twittername
     with open(logfile, 'r') as f:
         for line in f:
             if "$$followinguser" in line:

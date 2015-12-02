@@ -9,7 +9,7 @@ import logging
 
 vr_base = os.getenv('VR_BASE')
 
-logging.basicConfig(filename='%s/../logs/runtime_control.txt' % vr_base, maxBytes=20000000, level=logging.DEBUG)
+logging.basicConfig(filename='%s/../logs/runtime_control.txt' % vr_base, maxBytes=20000000, level=logging.INFO)
 
 __author__ = 'alex'
 

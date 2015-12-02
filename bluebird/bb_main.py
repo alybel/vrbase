@@ -13,17 +13,18 @@ import time
 import numpy.random as nr
 import load_config
 
+import datetime as dt
+
 import tweepy
 
 formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+
+recent_follows = {}
 
 # first file logger
 logr = logging.getLogger('logger')
 hdlr_1 = None
 TextBuilder = None
-
-recent_follows = []
-
 
 class ManageUpdatesPerDay(object):
     def __init__(self, max_updates, use_timer=False):
@@ -105,9 +106,18 @@ def retweet_management(t, ca, api):
     bbl.ca_save_state(ca, "retweets")
     return True
 
+def add_follow_to_watchlist(user_id):
+    global recent_follows
+    # add new follow
+    recent_follows[dt.datetime.now()] = user_id
+    logr.info('adding %s to recent_follows' % user_id)
+    # kick out all follows which are older than 50 days
+    for key in recent_follows.keys():
+        if key < dt.datetime.now() - dt.timedelta(50):
+            logr.info('cleaning recent_follows from old entries')
+            del recent_follows[key]
 
 def follow_management(t, ca, api):
-    global recent_follows
     lp("entering follow management")
     if ca.isin(t.user_id):
         return False
@@ -115,7 +125,7 @@ def follow_management(t, ca, api):
     if not status:
         return False
     ca.add(t.user_screen_name)
-    recent_follows.append(t.user_id)
+    add_follow_to_watchlist(t.user_id)
     next_entry = ca.get_next_entry()
     if next_entry:
         # user may not exist any more in the future. hence errors here need to be catched.
@@ -142,14 +152,19 @@ class TweetBuffer(object):
         self.management_fct = management_fct
         self.delta_time = delta_time
         self.max_number_actions = max_number_actions
+        self.this_run_not_yet_carried_out = True
         lp("initiate tweet buffer")
         logr.info("initiate tweet buffer")
 
     def add_to_buffer(self, t, score):
         # Check if something in Buffer and if yes flush the buffer, else append to buffer
         if self.buffer and bba.minutes_of_day() % self.delta_time == 0:
-            self.flush_buffer()
-            self.buffer = []
+            if self.this_run_not_yet_carried_out:
+                self.flush_buffer()
+                self.buffer = []
+                self.this_run_not_yet_carried_out = False
+        if bba.minutes_of_day() % self.delta_time != 0:
+            self.this_run_not_yet_carried_out = True
         else:
             self.buffer.append((score, t))
 
@@ -208,15 +223,11 @@ class FavListener(tweepy.StreamListener):
             api=self.api, ca=self.ca, management_fct=favorite_management,
             delta_time=cfg.activity_frequency)
 
-        # TODO: ReWrite recent_follows such that vector does not become infinitely long ...
-        global recent_follows
-        recent_follows = list(bbl.get_recent_follows(days=50))
-        print len(recent_follows), "recent follows prevented from following here"
-        try:
-            print "last follow", recent_follows[-1]
-        except IndexError:
-            # in case no follows have been carried out yet.
-            pass
+        recent_follows_from_file = list(bbl.get_recent_follows(days=50))
+        print recent_follows_from_file
+        for user_id in recent_follows_from_file:
+            time.sleep(0.01)
+            add_follow_to_watchlist(user_id)
 
     def on_data(self, data):
         t = bbl.tweet2obj(data)
@@ -299,7 +310,7 @@ class FavListener(tweepy.StreamListener):
                     return True
             # Check if the person to follow has been already followed in the past X days.
             # In this case, do not follow again until this period is over.
-            if int(t.user_id) in recent_follows:
+            if int(t.user_id) in recent_follows.values():
                 logr.info("refollowprevented;%s" % t.user_id)
                 return True
             self.tbuffer.add_to_buffer(t, score)

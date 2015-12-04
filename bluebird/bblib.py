@@ -281,7 +281,6 @@ class BuildText(object):
         self.preambles = preambles
         self.hashtags = hashtags
         self.last_used_preamble = ""
-        self.g = Goose()
         if os.path.isfile("last_title.sav"):
             try:
                 self.last_titles = self.load_last_titles()
@@ -367,7 +366,8 @@ class BuildText(object):
         # choose preamble
         # build first part of text
         try:
-            article = self.g.extract(url)
+            g = Goose()
+            article = g.extract(url)
         except:
             logr.info('Failed to extracting article with goose in build_text')
             return None, 0

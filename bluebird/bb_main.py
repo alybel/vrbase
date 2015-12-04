@@ -294,8 +294,8 @@ class FavListener(tweepy.StreamListener):
                         logr.info("$$MissedStatusUpdateNoText;%d;%s" % (score, text))
                         
         if score >= cfg.retweet_score:
-            logr.info('entering retweet area, retweet_score is %d;size of ca_recent_r: %s' %
-                      (cfg.retweet_score, sys.getsizeof(self.ca_recent_r.get_list())))
+            logr.info('entering retweet area, retweet_score is %d;length of ca_recent_r: %s' %
+                      (cfg.retweet_score, len(self.ca_recent_r.get_list())))
             if not self.CSim.tweets_similar_list(t.text, self.ca_recent_r.get_list()):
                 self.tbuffer_rt.add_to_buffer(t, score)
                 self.ca_recent_r.add(t.text, auto_increase=True)

@@ -14,7 +14,6 @@ import random
 import lxml.html
 import pymongo
 import requests
-from goose import Goose
 import operator
 from lxml import etree
 from io import StringIO
@@ -366,8 +365,7 @@ class BuildText(object):
         # choose preamble
         # build first part of text
         try:
-            g = Goose()
-            article = g.extract(url)
+            article = get_article_from_url(url)
         except:
             logr.info('Failed to extracting article with goose in build_text')
             return None, 0
@@ -400,6 +398,12 @@ class BuildText(object):
         if cfg.verbose:
             print "generic text:", text
         return text, score
+
+def get_article_from_url(url):
+        from goose import Goose
+        g = Goose()
+        article = g.extract(url)
+        return article
 
 
 def update_status(text, api, score):

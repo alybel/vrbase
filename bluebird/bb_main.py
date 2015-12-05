@@ -400,4 +400,3 @@ if __name__ == "__main__":
             print '-' * 60
             time.sleep(2)
             # ToDo remove the below line to guarantee ongoing operations
-            sys.exit()

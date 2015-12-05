@@ -282,10 +282,7 @@ def build_text(url):
     # choose preamble
     # build first part of text
     try:
-        #article = get_article_from_url(url)
-        class article:
-            text = 'wifhwkerhgoerhg'
-            title = 'kfheierhfieurghei'
+        article = get_article_from_url(url)
     except:
         logr.info('Failed to extracting article with goose in build_text')
         return None, 0
@@ -323,6 +320,7 @@ def get_article_from_url(url):
         from goose import Goose
         g = Goose()
         article = g.extract(url)
+        del Goose
         return article
 
 

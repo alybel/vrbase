@@ -325,12 +325,12 @@ from goose import Goose
 g = Goose()
 
 def get_article_from_url(url):
-    logr.info(sys.getsizeof(g))
-    logr.info(sys.getsizeof(Goose))
-    article = g.extract(url)
-    logr.info(sys.getsizeof(article))
+    #logr.info(sys.getsizeof(g))
+    #logr.info(sys.getsizeof(Goose))
+    #article = g.extract(url)
+    #logr.info(sys.getsizeof(article))
     article_text, title = article.cleaned_text, article.title
-    return article_text, title
+    return 'a', 'b'
 
 
 def update_status(text, api, score):

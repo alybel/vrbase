@@ -284,7 +284,7 @@ def build_text(url):
     # build first part of text
     try:
         #article_text, title = get_article_from_url(url)
-        article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', ''machine learning, startup, ecommerce, fraud, risk, business''
+        article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
     except Exception,e:
         logr.info('Failed to extracting article with goose in build_text. url was: %s, error was:' % (url, e))
         return None, 0

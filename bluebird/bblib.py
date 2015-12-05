@@ -284,38 +284,41 @@ def build_text(url):
     try:
         article = get_article_from_url(url)
     except Exception,e:
-        logr.info(e)
-        logr.info('Failed to extracting article with goose in build_text. url was: %s' % url)
+        logr.info('Failed to extracting article with goose in build_text. url was: %s, error was:' % (url, e))
         return None, 0
     title = article.title
     if title is None:
         return None, -1
-    text = "%s %s" % (title, url)
+    tweet_text = "%s %s" % (title, url)
+    if article.cleaned_text == '':
+        logr.info('empty text body, url was: %s' % url)
+        return None, 0
     # Title must exist an consist of at least 4 words
-    if text is None or len(text.split(" ")) < 3:
+    if tweet_text is None or len(tweet_text.split(" ")) < 3:
         return None, -2
     # add hashtags until tweet length is full
     try:
         score = bbanalytics.score_tweets(article.cleaned_text, is_body=True)
         hashtag_candidates = bbanalytics.get_matching_keywords(article.cleaned_text)
+        print hashtag_candidates
     except UnicodeError:
         print 'unicode error'
         score = -1
         hashtag_candidates = []
     sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
     for i in xrange(3):
-        old_text = "%s" % text
+        old_text = "%s" % tweet_text
         try:
             hashtag = sorted_hts[i]
-            text += " #" + hashtag[0]
+            tweet_text += " #" + hashtag[0]
         except IndexError:
             logr.info('Building tweet failed. urls was: %s' % url)
-        if len(text) > 140:
+        if len(tweet_text) > 140:
             text = old_text
             break
     if cfg.verbose:
-        print "generic text:", text
-    return text, score
+        print "generic text:", tweet_text
+    return tweet_text, score
 
 def get_article_from_url(url):
         from goose import Goose

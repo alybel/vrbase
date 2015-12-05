@@ -283,8 +283,9 @@ def build_text(url):
     # build first part of text
     try:
         article = get_article_from_url(url)
-    except:
-        logr.info('Failed to extracting article with goose in build_text')
+    except Exception,e:
+        logr.info(e)
+        logr.info('Failed to extracting article with goose in build_text. url was: %s' % url)
         return None, 0
     title = article.title
     if title is None:

@@ -283,8 +283,8 @@ def build_text(url):
     # choose preamble
     # build first part of text
     try:
-        #article_text, title = get_article_from_url(url)
-        article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
+        article_text, title = get_article_from_url(url)
+        #article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
     except Exception,e:
         logr.info('Failed to extracting article with goose in build_text. url was: %s, error was:' % (url, e))
         return None, 0
@@ -325,7 +325,7 @@ def get_article_from_url(url):
     from goose import Goose
     g = Goose()
     article = g.extract(url)
-    article_text, title = copy.copy(article.cleaned_text), copy.copy(article.title)
+    article_text, title = str(copy.copy(article.cleaned_text)), str(copy.copy(article.title))
     del article
     del Goose
     del g

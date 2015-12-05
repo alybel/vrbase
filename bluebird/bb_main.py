@@ -269,8 +269,8 @@ class FavListener(tweepy.StreamListener):
             url = bba.extract_url_from_tweet(t.text)
             if url:
                 # return text and score from generated text. If no text is generated, TextBuilder will return 0 as score
-                text, score2 = bbl.build_text(url)
-
+                #text, score2 = bbl.build_text(url)
+                text, score2 = "Great map of the German #FinTech industry. #startup #VC http://buff.ly/1XGaaWX", 20
                 # check if score2 also fulfills the score criteria
                 if score2 > cfg.status_update_score:
                     update_candidate = True

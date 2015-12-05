@@ -2,8 +2,8 @@ from sqlalchemy import schema, types, create_engine, orm
 import os
 
 def load_config(own_twittername=''):
-    connection_string = 'mysql+pymysql://root:valuereachdb@localhost:3306/valuereach'
-    eng = create_engine(connection_string)
+    connection_string = 'mysql+pymysql://root:valuereachdb@localhost:3306/valuereach?charset=utf8mb4'
+    eng = create_engine(connection_string, convert_unicode=True)
     md = schema.MetaData(bind=eng, reflect=True)
     Session = orm.sessionmaker(bind=eng, autoflush=True, autocommit=False,
                                expire_on_commit=True)
@@ -43,8 +43,6 @@ def load_config(own_twittername=''):
     cfg.verbose = False
     cfg.languages = ['en', 'de']
     cfg.locations = []
-    cfg.preambles = []
-    cfg.hashtags = []
     cfg.activity_frequency = 15
     cfg.number_hashtags = 3
     cfg.status_update_prob = 0.5

@@ -274,130 +274,47 @@ def remove_favorite(identifier, api):
         logr.debug("in function remove_favorite; %s" % e)
 
 
-class BuildText(object):
-    def __init__(self, preambles, hashtags):
-        # this line to be deleted and preambled removed from function call and in init
-        self.preambles = preambles
-        self.hashtags = hashtags
-        self.last_used_preamble = ""
-        if os.path.isfile("last_title.sav"):
-            try:
-                self.last_titles = self.load_last_titles()
-            except:
-                self.last_titles = CyclicArray(100)
-        else:
-            self.last_titles = CyclicArray(100)
-
-    def get_title_from_website(self, html, debug=False):
+def build_text(url):
+    """
+    take in a URL and build a tweet around it. use preambles and hashtags from random
+    choice but make sure not to repeat the last one.
+    """
+    # choose preamble
+    # build first part of text
+    try:
+        article = get_article_from_url(url)
+    except:
+        logr.info('Failed to extracting article with goose in build_text')
+        return None, 0
+    title = article.title
+    if title is None:
+        return None, -1
+    text = "%s %s" % (title, url)
+    # Title must exist an consist of at least 4 words
+    if text is None or len(text.split(" ")) < 3:
+        return None, -2
+    # add hashtags until tweet length is full
+    try:
+        score = bbanalytics.score_tweets(article.cleaned_text, is_body=True)
+        hashtag_candidates = bbanalytics.get_matching_keywords(article.cleaned_text)
+    except UnicodeError:
+        print 'unicode error'
+        score = -1
+        hashtag_candidates = []
+    sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
+    for i in xrange(3):
+        old_text = "%s" % text
         try:
-            t = lxml.html.parse(StringIO(html))
-        except:
-            logr.info("in get_title_from_website, lxml.html fails")
-            return None
-        if t is None:
-            return None
-        try:
-            obj = t.find(".//title")
-        except:
-            logr.info("in get_title_from_website, no title found")
-            return None
-        if obj is None:
-            return None
-        text = obj.text
-        if not text:
-            logr.info("in get_title_from_website No Text in Website")
-            return None
-        if not text:
-            logr.info("in get_title_from_website Text has wrong encoding")
-            return None
-        if self.last_titles.isin(text) and not debug:
-            logr.info('in get_title_from_website already_twittered')
-            return None
-        if len(text) > 20:
-            if not debug:
-                self.last_titles.add(text, auto_increase=True)
-                self.update_last_titles(self.last_titles)
-            logr.info('in get_title_from_website success')
-            return text
-        else:
-            logr.info('in get_title_from_website failure')
-            return None
-
-    @staticmethod
-    def load_last_titles():
-        with open("last_title.sav", "r") as f:
-            return pickle.load(f)
-
-    @staticmethod
-    def update_last_titles(l):
-        f = open("last_title.sav", "w")
-        pickle.dump(l, f)
-        f.close()
-        return
-
-    @staticmethod
-    def get_ws_html(url):
-        #req = urllib2.Request(url, headers=hdr)
-        try:
-            #html = urllib2.urlopen(req).read()
-            html = requests.get(url, timeout=1)
-        except Exception, e:
-            logr.info("in function get_ws_html")
-            return None
-        html = unicode(html, errors='ignore')
-        return html
-
-    @staticmethod
-    def read_ws(html):
-        try:
-            ws = lxml.html.parse(StringIO(html))
-        except:
-            logr.info('in function read_ws')
-            return ''
-        result = etree.tostring(ws.getroot(), pretty_print=False, method="html")
-        return result
-
-    def build_text(self, url, debug=False):
-        """
-        take in a URL and build a tweet around it. use preambles and hashtags from random
-        choice but make sure not to repeat the last one.
-        """
-        # choose preamble
-        # build first part of text
-        try:
-            article = get_article_from_url(url)
-        except:
-            logr.info('Failed to extracting article with goose in build_text')
-            return None, 0
-        title = article.title
-        if title is None:
-            return None, 0
-        text = "%s %s" % (title, url)
-        # Title must exist an consist of at least 4 words
-        if text is None or len(text.split(" ")) < 3:
-            return None, 0
-        # add hashtags until tweet length is full
-        try:
-            score = bbanalytics.score_tweets(article.cleaned_text, is_body=True)
-            hashtag_candidates = bbanalytics.get_matching_keywords(article.cleaned_text)
-        except UnicodeError:
-            print 'unicode error'
-            score = -1
-            hashtag_candidates = []
-        sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
-        for i in xrange(3):
-            old_text = "%s" % text
-            try:
-                hashtag = sorted_hts[i]
-                text += " #" + hashtag[0]
-            except IndexError:
-                logr.info('Building tweet failed')
-            if len(text) > 140:
-                text = old_text
-                break
-        if cfg.verbose:
-            print "generic text:", text
-        return text, score
+            hashtag = sorted_hts[i]
+            text += " #" + hashtag[0]
+        except IndexError:
+            logr.info('Building tweet failed')
+        if len(text) > 140:
+            text = old_text
+            break
+    if cfg.verbose:
+        print "generic text:", text
+    return text, score
 
 def get_article_from_url(url):
         from goose import Goose

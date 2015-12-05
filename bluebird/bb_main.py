@@ -24,7 +24,7 @@ recent_follows = {}
 # first file logger
 logr = logging.getLogger('logger')
 hdlr_1 = None
-TextBuilder = None
+
 
 class ManageUpdatesPerDay(object):
     def __init__(self, max_updates, use_timer=False):
@@ -205,6 +205,7 @@ class FavListener(tweepy.StreamListener):
 
         self.ca_recent_r = bbl.CyclicArray(100)
         self.ca_recent_f = bbl.CyclicArray(100)
+        self.ca_recent_tweets = bbl.CyclicArray(100)
 
         self.ca.release_add_lock_if_necessary()
         self.ca_r.release_add_lock_if_necessary()
@@ -268,13 +269,17 @@ class FavListener(tweepy.StreamListener):
             url = bba.extract_url_from_tweet(t.text)
             if url:
                 # return text and score from generated text. If no text is generated, TextBuilder will return 0 as score
-                text, score2 = TextBuilder.build_text(url)
+                text, score2 = bbl.build_text(url)
+
                 # check if score2 also fulfills the score criteria
                 if score2 > cfg.status_update_score:
                     update_candidate = True
                 else:
                     update_candidate = False
                     logr.info("$$MissedStatusUpdateStatusScoreTooLow;%d;%s;%s" % (score2, text, url))
+                if self.CSim.tweets_similar_list(t.text, self.ca_recent_tweets.get_list()):
+                    logr.info('Tweet to similar %s' % text)
+                    update_candidate = False
                 # in case the text retrieved from the headline contains negative or
                 # forbidden keywords, don't send the update
                 if update_candidate and text:  # in some cases, text may be None.
@@ -285,6 +290,7 @@ class FavListener(tweepy.StreamListener):
                     if update_candidate and text and random.random() < cfg.status_update_prob:
                         if not ManageUpdatesPerDay.max_reached():
                             bbl.update_status(text=text, api=self.api, score=score)
+                            self.ca_recent_tweets.add(text, auto_increase=True)
                             ManageUpdatesPerDay.add_update()
                         else:
                             logr.info("$$MaxStatusUpdateMaxPerDayReached;%d;%s" % (score, text))
@@ -371,7 +377,6 @@ if __name__ == "__main__":
     ManageUpdatesPerDay = ManageUpdatesPerDay(cfg.max_updates_per_day, use_timer=True)
     # TODO below object not yet in use. Find proper use of it in a place where it
     # not called to oftern
-    TextBuilder = bbl.BuildText(preambles=cfg.preambles, hashtags=cfg.hashtags)
     auth, global_api = bbl.connect_app_to_twitter()
     bbl.set_api(global_api)
     update_user_info = bbl.UpdateUserInfo(api=global_api, account_name=cfg.own_twittername)

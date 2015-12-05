@@ -282,7 +282,10 @@ def build_text(url):
     # choose preamble
     # build first part of text
     try:
-        article = get_article_from_url(url)
+        #article = get_article_from_url(url)
+        class article:
+            text = 'wifhwkerhgoerhg'
+            title = 'kfheierhfieurghei'
     except:
         logr.info('Failed to extracting article with goose in build_text')
         return None, 0
@@ -301,8 +304,6 @@ def build_text(url):
         print 'unicode error'
         score = -1
         hashtag_candidates = []
-        del article
-    del article
     sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
     for i in xrange(3):
         old_text = "%s" % text

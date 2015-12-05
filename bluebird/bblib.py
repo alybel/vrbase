@@ -324,9 +324,10 @@ def get_article_from_url(url):
     from goose import Goose
     g = Goose()
     article = g.extract(url)
-    del Goose
     article_text, title = copy.copy(article.cleaned_text), copy.copy(article.title)
     del article
+    del Goose
+    del g
     return article_text, title
 
 

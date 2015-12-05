@@ -321,14 +321,15 @@ def build_text(url):
         print "generic text:", tweet_text
     return tweet_text, score
 
+from goose import Goose
+g = Goose()
+
 def get_article_from_url(url):
-    from goose import Goose
-    g = Goose()
+    logr.info(sys.getsizeof(g))
+    logr.info(sys.getsizeof(Goose))
     article = g.extract(url)
+    logr.info(sys.getsizeof(article))
     article_text, title = str(copy.copy(article.cleaned_text)), str(copy.copy(article.title))
-    del article
-    del Goose
-    del g
     return article_text, title
 
 

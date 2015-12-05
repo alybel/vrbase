@@ -309,7 +309,7 @@ def build_text(url):
             hashtag = sorted_hts[i]
             text += " #" + hashtag[0]
         except IndexError:
-            logr.info('Building tweet failed')
+            logr.info('Building tweet failed. urls was: %s' % url)
         if len(text) > 140:
             text = old_text
             break

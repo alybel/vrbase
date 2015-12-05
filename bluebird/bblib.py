@@ -17,6 +17,7 @@ import requests
 import operator
 from lxml import etree
 from io import StringIO
+import copy
 
 
 # Make config file available in this module
@@ -282,15 +283,14 @@ def build_text(url):
     # choose preamble
     # build first part of text
     try:
-        article = get_article_from_url(url)
+        article_text, title = get_article_from_url(url)
     except Exception,e:
         logr.info('Failed to extracting article with goose in build_text. url was: %s, error was:' % (url, e))
         return None, 0
-    title = article.title
     if title is None:
         return None, -1
     tweet_text = "%s %s" % (title, url)
-    if article.cleaned_text == '':
+    if article_text == '':
         logr.info('empty text body, url was: %s' % url)
         return None, 0
     # Title must exist an consist of at least 4 words
@@ -298,8 +298,8 @@ def build_text(url):
         return None, -2
     # add hashtags until tweet length is full
     try:
-        score = bbanalytics.score_tweets(article.cleaned_text, is_body=True)
-        hashtag_candidates = bbanalytics.get_matching_keywords(article.cleaned_text)
+        score = bbanalytics.score_tweets(article_text, is_body=True)
+        hashtag_candidates = bbanalytics.get_matching_keywords(article_text)
         print hashtag_candidates
     except UnicodeError:
         print 'unicode error'
@@ -314,18 +314,20 @@ def build_text(url):
         except IndexError:
             logr.info('Building tweet failed. urls was: %s' % url)
         if len(tweet_text) > 140:
-            text = old_text
+            tweet_text = old_text
             break
     if cfg.verbose:
         print "generic text:", tweet_text
     return tweet_text, score
 
 def get_article_from_url(url):
-        from goose import Goose
-        g = Goose()
-        article = g.extract(url)
-        del Goose
-        return article
+    from goose import Goose
+    g = Goose()
+    article = g.extract(url)
+    del Goose
+    article_text, title = copy.copy(article.cleaned_text), copy.copy(article.title)
+    del article
+    return article_text, title
 
 
 def update_status(text, api, score):

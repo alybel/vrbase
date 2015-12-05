@@ -328,7 +328,7 @@ def get_article_from_url(url):
     g = Goose()
     #logr.info(sys.getsizeof(g))
     #logr.info(sys.getsizeof(Goose))
-    #article = g.extract(url)
+    article = g.extract(url)
     #logr.info(sys.getsizeof(article))
     #article_text, title = article.cleaned_text, article.title
     return 'a', 'b'

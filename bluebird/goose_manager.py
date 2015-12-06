@@ -1,5 +1,8 @@
 __author__ = 'alex'
+from memory_profiler import profile
 
+
+@profile
 def get_ws_text_and_title(url):
     from goose import Goose
     g = Goose()

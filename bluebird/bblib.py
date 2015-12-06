@@ -18,7 +18,7 @@ import operator
 from lxml import etree
 from io import StringIO
 import copy
-
+from memory_profiler import profile
 
 # Make config file available in this module
 cfg = None
@@ -274,7 +274,7 @@ def remove_favorite(identifier, api):
         print e
         logr.debug("in function remove_favorite; %s" % e)
 
-
+@profile
 def build_text(url):
     """
     take in a URL and build a tweet around it. use preambles and hashtags from random
@@ -325,7 +325,7 @@ def build_text(url):
     return tweet_text, score
 
 
-
+@profile
 def get_article_from_url(url):
     import goose_manager
     article, text = goose_manager.get_ws_text_and_title(url)

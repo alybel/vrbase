@@ -7,4 +7,5 @@ def get_ws_text_and_title(url):
     #logr.info(sys.getsizeof(Goose))
     article = g.extract(url)
     #logr.info(sys.getsizeof(article))
-    return article.cleaned_text, article.title
+    #return article.cleaned_text, article.title
+    return 'a', 'b'

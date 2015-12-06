@@ -288,6 +288,7 @@ def build_text(url):
     except Exception,e:
         logr.info('Failed to extracting article with goose in build_text. url was: %s, problem was: %s' % (url, e))
         return None, 0
+    return None, 0
     if title is None:
         return None, -1
     tweet_text = "%s %s" % (title, url)
@@ -295,7 +296,7 @@ def build_text(url):
         logr.info('empty text body, url was: %s' % url)
         return None, 0
     # Title must exist an consist of at least 4 words
-    return None, 0
+    ##
     if tweet_text is None or len(tweet_text.split(" ")) < 3:
         return None, -2
     # add hashtags until tweet length is full

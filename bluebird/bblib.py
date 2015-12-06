@@ -286,7 +286,7 @@ def build_text(url):
         article_text, title = get_article_from_url(url)
         #article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
     except Exception,e:
-        logr.info('Failed to extracting article with goose in build_text. url was: %s, problem was:' % (url, e))
+        logr.info('Failed to extracting article with goose in build_text. url was: %s, problem was: %s' % (url, e))
         return None, 0
     if title is None:
         return None, -1

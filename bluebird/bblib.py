@@ -295,6 +295,7 @@ def build_text(url):
         logr.info('empty text body, url was: %s' % url)
         return None, 0
     # Title must exist an consist of at least 4 words
+    return None, 0
     if tweet_text is None or len(tweet_text.split(" ")) < 3:
         return None, -2
     # add hashtags until tweet length is full
@@ -306,7 +307,7 @@ def build_text(url):
         print 'unicode error'
         score = -1
         hashtag_candidates = []
-    return None, 0
+
     sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
     for i in xrange(3):
         old_text = "%s" % tweet_text

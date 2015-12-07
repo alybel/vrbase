@@ -279,8 +279,8 @@ def build_text(url):
     # choose preamble
     # build first part of text
     try:
-        article_text, title = goose_manager.get_ws_text_and_title(url)
-        #article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
+#        article_text, title = goose_manager.get_ws_text_and_title(url)
+        article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
     except Exception,e:
         logr.info('Failed to extracting article with goose in build_text. url was: %s, problem was: %s' % (url, e))
         return None, 0

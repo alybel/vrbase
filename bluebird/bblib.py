@@ -13,8 +13,9 @@ import os.path
 import random
 import pymongo
 import operator
-import goose_manager
-
+#import goose_manager
+import requests
+from lxml import html
 
 # Make config file available in this module
 cfg = None
@@ -270,6 +271,13 @@ def remove_favorite(identifier, api):
         print e
         logr.debug("in function remove_favorite; %s" % e)
 
+def get_title_and_text(url):
+    ws = requests.get(url)
+    tree = html.fromstring(ws.content)
+    title_cand = tree.xpath('//title')[0].text
+    title = title_cand.replace('|', '')
+    return title, ws.content
+
 
 def build_text(url):
     """
@@ -279,7 +287,8 @@ def build_text(url):
     # choose preamble
     # build first part of text
     try:
-        article_text, title = goose_manager.get_ws_text_and_title()
+        article_text, title = get_title_and_text(url)
+        #article_text, title = goose_manager.get_ws_text_and_title()
         #article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
     except Exception,e:
         logr.info('Failed to extracting article with goose in build_text. url was: %s, problem was: %s' % (url, e))

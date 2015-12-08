@@ -268,10 +268,10 @@ class FavListener(tweepy.StreamListener):
 
         if score >= cfg.status_update_score:
             url = bba.extract_url_from_tweet(t.text)
+            logr.info('tweet accepted to status routing: %s' % t.text)
             if url:
                 # return text and score from generated text. If no text is generated, TextBuilder will return 0 as score
                 text, score2 = bbl.build_text(url)
-                return True
                 # check if score2 also fulfills the score criteria
                 if score2 > cfg.status_update_score:
                     update_candidate = True

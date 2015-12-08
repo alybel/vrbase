@@ -311,7 +311,8 @@ def build_text(url):
     except UnicodeError:
         print 'unicode error'
         score = -1
-        hashtag_candidates = []
+        hashtag_candidates = {}
+        return None, 0
     ##
     sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
     for i in xrange(3):

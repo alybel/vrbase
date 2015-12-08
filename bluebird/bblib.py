@@ -321,6 +321,8 @@ def build_text(url):
             tweet_text += " #" + hashtag[0]
         except IndexError:
             logr.info('Building tweet failed. urls was: %s' % url)
+        except UnicodeDecodeError:
+            logr.info('Building tweet failed on Uniode, tweet was: %s' % tweet_text)
         if len(tweet_text) > 140:
             tweet_text = old_text
             break

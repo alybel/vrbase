@@ -309,7 +309,6 @@ def build_text(url):
         hashtag_candidates = bbanalytics.get_matching_keywords(article_text)
         print hashtag_candidates
     except UnicodeError:
-        print 'unicode error'
         score = -1
         hashtag_candidates = {}
         return None, 0

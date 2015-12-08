@@ -287,7 +287,7 @@ def build_text(url):
     # choose preamble
     # build first part of text
     try:
-        article_text, title = get_title_and_text(url)
+        title, article_text = get_title_and_text(url)
         #article_text, title = goose_manager.get_ws_text_and_title()
         #article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
     except Exception,e:

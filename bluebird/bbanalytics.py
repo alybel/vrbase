@@ -214,7 +214,7 @@ def is_url_in_tweet(t = ""):
 
 
 def extract_url_from_tweet(t = ""):
-    "extract url from a string. Check if url is more than 18 characters, as for example: http://bit.ly/fi23uhf"
+    """extract url from a string. Check if url is more than 18 characters, as for example: http://bit.ly/fi23uhf"""
     q = t.split(" ")
     for word in q:
         if "http" in word and len(word) > 18:
@@ -223,8 +223,9 @@ def extract_url_from_tweet(t = ""):
     return None
 
 def get_matching_keywords(text=''):
-    '''return a dictrionary that contains the keywords with weights that match a given text'''
+    """return a dictrionary that contains the keywords with weights that match a given text"""
     result = {}
+    text = text.decode('utf-8', 'replace')
     token = nltk.word_tokenize(text)
     for word in keywords:
         if word in token and word not in result:

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # Basic functionality used for the bluebird project"
 import tweepy
 import json
@@ -16,6 +17,7 @@ import operator
 #import goose_manager
 import requests
 from lxml import html
+
 
 # Make config file available in this module
 cfg = None
@@ -244,7 +246,7 @@ def print_tweet(t):
     print t.user_screen_name
     print t.user_description
     print t.user_no_followers
-    print "#####"
+
 
 
 def add_favorite(identifier, api):
@@ -276,6 +278,13 @@ def get_title_and_text(url):
     tree = html.fromstring(ws.content)
     title_cand = tree.xpath('//title')[0].text
     title = title_cand.replace('|', '')
+    title_vec = title.split(' ')
+    for i, word in enumerate(title_vec):
+        if '@' in word:
+            title_vec.drop(i)
+        if 'RT' in word:
+            title_vec.drop(i)
+    title = ' '.join(title_vec)
     return title, ws.content
 
 
@@ -288,31 +297,26 @@ def build_text(url):
     # build first part of text
     try:
         title, article_text = get_title_and_text(url)
-        #article_text, title = goose_manager.get_ws_text_and_title()
-        #article_text, title = 'machine learning, startup, ecommerce, fraud, risk, business', 'machine learning, startup, ecommerce, fraud, risk, business'
     except Exception,e:
-        logr.info('Failed to extracting article with goose in build_text. url was: %s, problem was: %s' % (url, e))
+        print e
+        logr.info('Failed to extracting article in build_text. url was: %s, problem was: %s' % (url, e))
         return None, 0
     if title is None:
         return None, -1
     tweet_text = "%s %s" % (title, url)
-    if article_text == '':
+    if len(article_text) == 0:
         logr.info('empty text body, url was: %s' % url)
-        return None, 0
-    # Title must exist an consist of at least 4 words
-    ##
-    if tweet_text is None or len(tweet_text.split(" ")) < 3:
         return None, -2
+    # Title must exist an consist of at least 4 words
+    if tweet_text is None or len(tweet_text.split(u" ")) < 3:
+        return None, -3
     # add hashtags until tweet length is full
     try:
         score = bbanalytics.score_tweets(article_text, is_body=True)
         hashtag_candidates = bbanalytics.get_matching_keywords(article_text)
-        print hashtag_candidates
-    except UnicodeError:
-        score = -1
-        hashtag_candidates = {}
-        return None, 0
-    ##
+    except UnicodeError, e:
+        print e
+        return None, -4
     sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
     for i in xrange(3):
         old_text = "%s" % tweet_text

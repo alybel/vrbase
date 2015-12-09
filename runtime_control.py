@@ -156,7 +156,7 @@ while True:
         # Case 3: account is set to ON and restart is needed, then restart account
         if is_set_on(acc) and is_set_to_restart(acc):
             if account_is_locked(account_name) and account_is_off(account_name):
-                pr('MAINTENANCE: Account ON and Up for restart but NOT RUNNING')
+                pr('MAINTENANCE: Account %s ON and Up for restart but NOT RUNNING' % account_name)
                 continue
             restart_account(acc)
             reset_restart_needed(acc)

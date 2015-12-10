@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 # Basic functionality used for the bluebird project"
 import tweepy
 import json
@@ -55,9 +54,9 @@ def parse_number_follows_from_logfile():
     with open("../accounts/%s/bluebird.log" % cfg.own_twittername, "r") as f:
         today_follow_counts = 0
         for line in f:
-            if today in line.decode('utf-8', 'replace') and "followinguser" in line:
+            if today in line and "followinguser" in line:
                 today_follow_counts += 1
-            if today in line.decode('utf-8', 'replace') and "follower_level_reached" in line:
+            if today in line and "follower_level_reached" in line:
                 return 5000
     return today_follow_counts
 
@@ -281,9 +280,9 @@ def get_title_and_text(url):
     title_vec = title.split(' ')
     for i, word in enumerate(title_vec):
         if '@' in word:
-            title_vec.drop(i)
+            title_vec.pop(i)
         if 'RT' in word:
-            title_vec.drop(i)
+            title_vec.pop(i)
     title = ' '.join(title_vec)
     return title, ws.content
 

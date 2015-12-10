@@ -272,6 +272,7 @@ class FavListener(tweepy.StreamListener):
             if url:
                 # return text and score from generated text. If no text is generated, TextBuilder will return 0 as score
                 text, score2 = bbl.build_text(url)
+                print text, score2
                 # check if score2 also fulfills the score criteria
                 if score2 > cfg.status_update_score:
                     update_candidate = True

@@ -297,7 +297,7 @@ def build_text(url):
     try:
         title, article_text = get_title_and_text(url)
     except Exception,e:
-        print e
+        logr.info(e)
         logr.info('Failed to extracting article in build_text. url was: %s, problem was: %s' % (url, e))
         return None, 0
     if title is None:
@@ -314,7 +314,7 @@ def build_text(url):
         score = bbanalytics.score_tweets(article_text, is_body=True)
         hashtag_candidates = bbanalytics.get_matching_keywords(article_text)
     except UnicodeError, e:
-        print e
+        logr.info("%s" % e)
         return None, -4
     sorted_hts = sorted(hashtag_candidates.items(), key=operator.itemgetter(1), reverse=True)
     for i in xrange(3):

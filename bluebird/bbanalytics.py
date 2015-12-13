@@ -72,6 +72,7 @@ def manage_keywords2(d):
     """
 
     keylist = d.keys()
+    keylist = [x.encode('utf-8', 'replace') for x in keylist]
     for key in keylist:
         if " " in key:
             d[key.replace(" ","")] = d.pop(key)
@@ -163,11 +164,12 @@ def eval_tweet2(t):
         raise ValueError('keywords list empty. is the config file properly loaded?')
     score = 0
     used_words = []
+    converted_keywords = [x.encode('utf-8', 'replace') for x in keywords]
     for i, word in enumerate(t):
         if word in used_words:
             continue
-        if word in keywords:
-            score += keywords[word]
+        if word in converted_keywords:
+            score += keywords[word.decode('utf-8')]
             used_words.append(word)
         else:
             if i == len(t) - 1:

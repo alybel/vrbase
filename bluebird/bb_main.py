@@ -236,7 +236,7 @@ class FavListener(tweepy.StreamListener):
         # in case tweet cannot be put in object format just skip this tweet
         self.action_counter += 1
         if self.action_counter > 200:
-            logr.info("$$ActionCounterAnother200. Last tweet: %s" % t.text)
+            logr.info("$$ActionCounterAnother200. Last tweet: %s" % t.text if t.text else 'no text in tweet')
             self.action_counter = 0
         if t is None:
             return True

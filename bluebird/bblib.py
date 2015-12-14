@@ -209,7 +209,7 @@ def tweet2obj(data):
     if verbose2:
         print data
     try:
-        Tweet.text = get_first_level_content(data, "text")
+        Tweet.text = get_first_level_content(data, "text").replace('\n', ' ')
         Tweet.lan = get_first_level_content(data, "lang")
         Tweet.created = get_first_level_content(data, "created_at")
         Tweet.id = get_first_level_content(data, "id")

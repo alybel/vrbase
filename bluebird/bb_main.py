@@ -45,8 +45,8 @@ class ManageUpdatesPerDay(object):
         self.clean_dict(self.timer)
         self.no_updates[bbl.get_today()] += 1
         if self.use_timer:
-            wait_time = time.time() + min(nr.exponential(24 * 60 * 60. / self.max_updates),
-                                                            2 * 60 * 60)
+            wait_time = time.time() + min(nr.exponential(12 * 60 * 60. / self.max_updates),
+                                                            2 * 60 * 60 / self.max_updates)
             self.timer[bbl.get_today()] = wait_time
             logr.info('$$WaitingTime set to %s' % wait_time)
         return
@@ -290,9 +290,12 @@ class FavListener(tweepy.StreamListener):
                     # Introduce some randomness such that not everything is automatically posted
                     if update_candidate and text and random.random() < cfg.status_update_prob:
                         if not ManageUpdatesPerDay.max_reached():
-                            bbl.update_status(text=text, api=self.api, score=score)
-                            self.ca_recent_tweets.add(text, auto_increase=True)
-                            ManageUpdatesPerDay.add_update()
+                            if bbl.in_time():
+                                bbl.update_status(text=text, api=self.api, score=score)
+                                self.ca_recent_tweets.add(text, auto_increase=True)
+                                ManageUpdatesPerDay.add_update()
+                            else:
+                                logr.info('$$NoStatusUpdatesNotInTime;%d;%s' % (score, text))
                         else:
                             logr.info("$$MaxStatusUpdateMaxPerDayReached;%d;%s" % (score, text))
                     elif text:

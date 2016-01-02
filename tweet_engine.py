@@ -3,7 +3,7 @@
 import sys
 import os.path
 import time
-valureach_ops_path = "/home/alex/valureach_ops"
+valureach_ops_path = "/home/vr/valureach_ops"
 sys.path.append("%s/bluebird" % valureach_ops_path)
 import bblib as bbl
 import random
@@ -11,7 +11,7 @@ import vr_main
 import subprocess
 
 def rtime():
-    return int(random.random()*10*60)
+    return int(random.random() * 10 * 60)
 
 def tweet_account(account_name=""):
     print "starting", account_name
@@ -25,12 +25,12 @@ def tweet_account(account_name=""):
     auth, api = bbl.connect_app_to_twitter()
     #Check for correct frequency
     freq = tweet.freq * 60
-    logfile = "%stweet_engine.log"%account_path
+    logfile = "%stweet_engine.log" % account_path
     if os.path.isfile(logfile):
         with open(logfile, 'r') as f:
             for line in f:
                 if "tweetid" in line:
-                    tweet_id  = line.strip("\n").split(":")[1]
+                    tweet_id =line.strip("\n").split(":")[1]
                     try:
                         api.destroy_status(tweet_id)
                         print account_name,"tweet destroyed in ramping up", tweet_id
@@ -45,7 +45,7 @@ def tweet_account(account_name=""):
         print "selected tweet:", sel_tweet
         res = api.update_status(sel_tweet)
         with open(logfile, 'a') as f:
-            f.write("tweetid:%d\n"%res.id)
+            f.write("tweetid:%d\n" % res.id)
         print account_name, "tweeted:", sel_tweet
         time.sleep(rtime())
         #retweet tweets from friended accounts

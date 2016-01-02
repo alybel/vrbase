@@ -5,6 +5,7 @@ import os.path
 import time
 valureach_ops_path = "/home/vr/valureach_ops"
 sys.path.append("%s/bluebird" % valureach_ops_path)
+import load_config
 import bblib as bbl
 import random
 import vr_main
@@ -19,7 +20,7 @@ def tweet_account(account_name=""):
     if not os.path.isfile("%s/tweet.py" % account_path):
         return False
     sys.path.append(account_path)
-    import config as cfg
+    cfg = load_config.load_config(account_name)
     import tweet
     bbl.set_cfg(cfg)
     auth, api = bbl.connect_app_to_twitter()

@@ -317,6 +317,7 @@ class FavListener(tweepy.StreamListener):
         if score >= cfg.follow_score:
             # check with vars(cfg) if cfg contains follow_prob
             if "follow_prob" in vars(cfg):
+                logr.info('follow_prob is: %s' % cfg.follow_prob)
                 if random.random() > cfg.follow_prob:
                     return True
             # Check if the person to follow has been already followed in the past X days.

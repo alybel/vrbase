@@ -31,8 +31,9 @@ vr_base = os.getenv('VR_BASE')
 
 def remove_lockfile(account):
     #ToDo needs to be checked
+    pr('lockfile removed for %s: ' % '%s/accounts/%s/.lock' % (vr_base, account['twittername']))
     os.remove('%s/accounts/%s/.lock' % (vr_base, account['twittername']))
-    pr('lockfile removed for %s ' % account['twittername'])
+    return
 
 def set_on_pause_until(time_delta=2, account=None):
     lockfile_removal_date = dt.date.today() + dt.timedelta(time_delta)

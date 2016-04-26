@@ -102,6 +102,7 @@ def put_state_in_action(account, running_accounts, account_name):
         # If account got killed or died, the .lock file will prevent the account from being restarted.
         if account_is_locked(account_name):
             pr('Account %s is not running but is set to be running, .lock exists. MAINTENANCE needed' % account_name)
+            #return
             return
         start_account(account)
     else:

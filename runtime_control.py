@@ -119,6 +119,8 @@ def put_state_in_action(account, running_accounts, account_name):
     if account['onoff'] == 1:
         # If account got killed or died, the .lock file will prevent the account from being restarted.
         if account_is_locked(account_name):
+            # remove the lockfile and then pause the account
+            remove_lockfile(account=acc)
             pr('Account %s is not running but is set to be running, .lock exists. MAINTENANCE needed' % account_name)
             time_delta = 1
             set_on_pause_until(time_delta=time_delta, account=account)

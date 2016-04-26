@@ -113,7 +113,7 @@ def put_state_in_action(account, running_accounts, account_name):
         if account_is_locked(account_name):
             pr('Account %s is not running but is set to be running, .lock exists. MAINTENANCE needed' % account_name)
             time_delta = 1
-            set_lockfile_removal_date(time_delta=time_delta, account=acccount)
+            set_lockfile_removal_date(time_delta=time_delta, account=account)
             pr('set lockfile_removal_date to %s ' % dt.date.today() + dt.timedelta(time_delta))
             return
         start_account(account)

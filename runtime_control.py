@@ -30,10 +30,11 @@ gs = md.tables['GeneralSettings']
 vr_base = os.getenv('VR_BASE')
 
 def remove_lockfile(account):
+    #ToDo needs to be checked
     os.remove('%s/accounts/%s/.lock' % (vr_base, account['twittername']))
     pr('lockfile removed for %s ' % account['twittername'])
 
-def set_lockfile_removal_date(time_delta=2, account=None):
+def set_on_pause_until(time_delta=2, account=None):
     lockfile_removal_date = dt.date.today() + dt.timedelta(time_delta)
 
     session = Session()
@@ -91,9 +92,7 @@ def is_paused(account):
     if datetime.date.today() < account['paused_until'].date():
         pr('%s is set on pause until %s' % (account['twittername'], account['paused_until']))
         return True
-    else:
-        remove_lockfile(account)
-        return False
+    return False
 
 def check_if_off_or_switch_off(account, running_accounts):
     if account['twittername'] in running_accounts:
@@ -121,7 +120,7 @@ def put_state_in_action(account, running_accounts, account_name):
         if account_is_locked(account_name):
             pr('Account %s is not running but is set to be running, .lock exists. MAINTENANCE needed' % account_name)
             time_delta = 1
-            set_lockfile_removal_date(time_delta=time_delta, account=account)
+            set_on_pause_until(time_delta=time_delta, account=account)
             return
         start_account(account)
     else:
@@ -182,7 +181,9 @@ while True:
         if is_set_on(acc) and is_set_to_restart(acc):
             if account_is_locked(account_name) and account_is_off(account_name):
                 time_delta = 1
-                set_lockfile_removal_date(time_delta=time_delta, account=acc)
+                #Set Paused_until date and remove lockfile immediately
+                set_on_pause_until(time_delta=time_delta, account=acc)
+                remove_lockfile(account=acc)
                 pr('MAINTENANCE: Account %s ON and Up for restart but NOT RUNNING' % account_name)
                 continue
             restart_account(acc)

@@ -101,7 +101,8 @@ def put_state_in_action(account, running_accounts, account_name):
     if account['onoff'] == 1:
         # If account got killed or died, the .lock file will prevent the account from being restarted.
         if account_is_locked(account_name):
-            pr('Account is not running but is set to be running, .lockfile exists. MAINTENANCE needed')
+            pr('Account %s is not running but is set to be running, .lock exists. MAINTENANCE needed' % account_name)
+            return
         start_account(account)
     else:
         if account['twittername'] in running_accounts:

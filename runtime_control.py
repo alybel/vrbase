@@ -29,6 +29,10 @@ gs = md.tables['GeneralSettings']
 
 vr_base = os.getenv('VR_BASE')
 
+def remove_lockfile(account):
+    os.remove('%s/accounts/%s/.lock' % (vr_base, account['twittername']))
+    pr('lockfile removed for %s ' % account['twittername'])
+
 def set_lockfile_removal_date(time_delta=2, account=None):
     lockfile_removal_date = dt.date.today() + dt.timedelta(time_delta)
 
@@ -85,8 +89,11 @@ def pull_data():
 
 def is_paused(account):
     if datetime.date.today() < account['paused_until'].date():
+        pr('%s is set on pause until %s' % (account['twittername'], account['paused_until']))
         return True
-    return False
+    else:
+        remove_lockfile(account)
+        return False
 
 def check_if_off_or_switch_off(account, running_accounts):
     if account['twittername'] in running_accounts:

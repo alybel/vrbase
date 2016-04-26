@@ -36,7 +36,8 @@ def set_lockfile_removal_date(time_delta=2, account=None):
     session.execute('UPDATE GeneralSettings SET paused_until = "%s" where own_twittername="%s";'
                     % (lockfile_removal_date, account['twittername']))
     session.commit()
-
+    pr('set lockfile_removal_date to %s ' % (dt.date.today() + dt.timedelta(time_delta)))
+    return
 
 def account_is_locked(account=None):
     return os.path.isfile('%s/accounts/%s/.lock' % (vr_base, account))
@@ -114,7 +115,6 @@ def put_state_in_action(account, running_accounts, account_name):
             pr('Account %s is not running but is set to be running, .lock exists. MAINTENANCE needed' % account_name)
             time_delta = 1
             set_lockfile_removal_date(time_delta=time_delta, account=account)
-            pr('set lockfile_removal_date to %s ' % dt.date.today() + dt.timedelta(time_delta))
             return
         start_account(account)
     else:
@@ -176,7 +176,6 @@ while True:
             if account_is_locked(account_name) and account_is_off(account_name):
                 time_delta = 1
                 set_lockfile_removal_date(time_delta=time_delta, account=acc)
-                pr('set lockfile_removal_date to %s ' % dt.date.today() + dt.timedelta(time_delta))
                 pr('MAINTENANCE: Account %s ON and Up for restart but NOT RUNNING' % account_name)
                 continue
             restart_account(acc)

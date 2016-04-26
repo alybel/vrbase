@@ -1,4 +1,6 @@
-from sqlalchemy import schema, types, create_engine, orm
+# This Job runs as a screen session
+
+from sqlalchemy import schema, create_engine, orm
 import datetime
 import time
 import sys

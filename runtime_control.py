@@ -95,9 +95,11 @@ def state_changed(account):
         return True
     return False
 
-def put_state_in_action(account, running_accounts):
+def put_state_in_action(account, running_accounts, account_name):
     if account['onoff'] == 1:
         # If account got killed or died, the .lock file will prevent the account from being restarted.
+        if account_is_locked(account_name):
+            pr('Account is not running but is set to be running, .lockfile exists. MAINTENANCE needed')
         start_account(account)
     else:
         if account['twittername'] in running_accounts:
@@ -162,7 +164,7 @@ while True:
             reset_restart_needed(acc)
         # Case 4: State has changed, apply change.
         if state_changed(acc):
-            put_state_in_action(acc, all_running_accounts)
+            put_state_in_action(acc, all_running_accounts, account_name)
             time.sleep(5)
             update_all_states(accounts)
     pr('heartbeat')

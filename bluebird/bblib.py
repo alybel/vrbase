@@ -34,7 +34,7 @@ def set_cfg(cfgobj=None):
 def set_api(api=None):
     Session.api = api
 
-
+#ToDo: Do sth with the executed number follows per day
 def initialize():
     glob_today = str(datetime.date.today())
     executed_number_follows_per_day[glob_today] = parse_number_follows_from_logfile()

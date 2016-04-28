@@ -226,7 +226,7 @@ class FavListener(tweepy.StreamListener):
             delta_time=cfg.activity_frequency)
 
         recent_follows_from_file = list(bbl.get_recent_follows(days=50))
-        print recent_follows_from_file
+        print 'recent follows from file', recent_follows_from_file
         for user_id in recent_follows_from_file:
             time.sleep(0.01)
             add_follow_to_watchlist(user_id)

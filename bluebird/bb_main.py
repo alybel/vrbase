@@ -35,12 +35,14 @@ class ManageUpdatesPerDay(object):
         self.timer = collections.defaultdict(int)
 
     def max_reached(self):
+        # When a Default Dict index is not yet there, 0 will be returned
         if not self.use_timer:
             return self.no_updates[bbl.get_today()] >= self.max_updates
         else:
             return self.no_updates[bbl.get_today()] >= self.max_updates or time.time() < self.timer[bbl.get_today()]
 
     def add_update(self):
+        # remove all old days
         self.clean_dict(self.no_updates)
         self.clean_dict(self.timer)
         self.no_updates[bbl.get_today()] += 1
@@ -50,6 +52,9 @@ class ManageUpdatesPerDay(object):
             self.timer[bbl.get_today()] = wait_time
             logr.info('$$WaitingTime set to %s' % wait_time)
         return
+
+    def get_number_updates_from_today(self):
+        return self.no_updates[bbl.get_today()]
 
     @staticmethod
     def clean_dict(d):
@@ -297,7 +302,7 @@ class FavListener(tweepy.StreamListener):
                             else:
                                 logr.info('$$NoStatusUpdatesNotInTime;%d;%s' % (score, text))
                         else:
-                            logr.info("$$MaxStatusUpdateMaxPerDayReached;%d;%s" % (score, text))
+                            logr.info("$$MaxStatusUpdatesMaxPerDayReached;%d;%s (%d)" % (score, text, ManageUpdatesPerDay.get_number_updates_from_today()))
                     elif text:
                         logr.info("$$MissedStatusUpdateRejectedByRandomOrTextScore;%d;%s" % (score, text))
                     else:

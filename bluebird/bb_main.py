@@ -37,9 +37,16 @@ class ManageUpdatesPerDay(object):
     def max_reached(self):
         # When a Default Dict index is not yet there, 0 will be returned
         if not self.use_timer:
-            return self.no_updates[bbl.get_today()] >= self.max_updates
+            # return 1 if good to go
+            return -1 if self.no_updates[bbl.get_today()] >= self.max_updates else 1
         else:
-            return self.no_updates[bbl.get_today()] >= self.max_updates or time.time() < self.timer[bbl.get_today()]
+            # return 1 if good to go
+            if self.no_updates[bbl.get_today()] >= self.max_updates:
+                return -1
+            elif time.time() < self.timer[bbl.get_today()]:
+                return -2
+            else:
+                return 1
 
     def add_update(self):
         # remove all old days
@@ -294,7 +301,7 @@ class FavListener(tweepy.StreamListener):
                         logr.info("$$MissedStatusUpdateStatusScoreTooLowStage2;%d;%s;%s" % (score2, text, url))
                     # Introduce some randomness such that not everything is automatically posted
                     if update_candidate and text and random.random() < cfg.status_update_prob:
-                        if not ManageUpdatesPerDay.max_reached():
+                        if ManageUpdatesPerDay.max_reached()  == 1:
                             if bbl.in_time():
                                 bbl.update_status(text=text, api=self.api, score=score)
                                 self.ca_recent_tweets.add(text, auto_increase=True)
@@ -302,7 +309,9 @@ class FavListener(tweepy.StreamListener):
                             else:
                                 logr.info('$$NoStatusUpdatesNotInTime;%d;%s' % (score, text))
                         else:
-                            logr.info("$$MaxStatusUpdatesMaxPerDayReached;%d;%s (%d)" % (score, text, ManageUpdatesPerDay.get_number_updates_from_today()))
+                            logr.info("$$MaxStatusUpdatesMaxPerDayReached;%d;%s (Updates Today: %d, Error Code: %d)" %
+                                      (score, text, ManageUpdatesPerDay.get_number_updates_from_today(),
+                                      ManageUpdatesPerDay.max_reached()))
                     elif text:
                         logr.info("$$MissedStatusUpdateRejectedByRandomOrTextScore;%d;%s" % (score, text))
                     else:

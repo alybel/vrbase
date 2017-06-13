@@ -181,6 +181,8 @@ def eval_tweet2(t):
             if comb in keywords:
                 score += keywords[comb]
                 used_words.append(comb)
+    if score > 10:
+        logr.info("$$$$Eval2;Text:%s;TriggeredWords:%s"%(t, used_words))
     return score
 
 def score_tweets(t="", verbose = False, is_body=False):
@@ -197,11 +199,9 @@ def score_tweets(t="", verbose = False, is_body=False):
         if word in blacklist and not is_body:
             score -= blacklist[word]
             if verbose: print 'negative word',word
-    if score >=0 and verbose:
-        logr.info("TestTweet;%d;%s:%s"%(score,q,t))
-        print score
-        print q
-        print t
+    # log what keywords created the score above 10
+    if score >=10:
+        logr.info("$$TweetScore;%d;%s"%(score,t))
     return score
 
 

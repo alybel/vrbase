@@ -182,7 +182,7 @@ def eval_tweet2(t):
                 score += keywords[comb]
                 used_words.append(comb)
     if score > 10:
-        logr.info("$$$$Eval2;Text:%s;TriggeredWords:%s"%(t, used_words))
+        logr.info("$$$$Eval2;TriggeredWords:%s"%(used_words))
     return score
 
 def score_tweets(t="", verbose = False, is_body=False):

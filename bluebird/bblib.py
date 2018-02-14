@@ -40,6 +40,8 @@ def initialize():
     executed_number_follows_per_day[glob_today] = parse_number_follows_from_logfile()
     print "already added number of users today:", executed_number_follows_per_day[glob_today]
 
+def get_account_dir():
+    return os.path.join('../accounts/', cfg.own_twittername)
 
 # verbose2 for all data that flows in
 verbose2 = False
@@ -73,6 +75,7 @@ class CyclicArray(object):
         if not arr:
             arr = []
         arr_len = len(arr)
+        print 'arr length', self.array_length
         if arr_len > self.array_length:
             raise Exception("in class CyclicArray function load_with_array: array to load is too long.")
         self.reset()
@@ -157,10 +160,12 @@ def get_ca_len(name=""):
 
 
 def ca_initialize(name=""):
-    if not os.path.isfile(name + ".sav"):
+    ca_filename = os.path.join(get_account_dir(), name + ".sav")
+    print ca_filename
+    if not os.path.isfile(ca_filename):
         return CyclicArray(length=get_ca_len(name))
     else:
-        ca = pickle.load(open(name + ".sav", "rb"))
+        ca = pickle.load(open(ca_filename, "rb"))
         if ca.get_array_length() != get_ca_len(name):
             print "length in config file has changed, tailoring..."
             ca.change_array_length(get_ca_len(name))
@@ -169,7 +174,8 @@ def ca_initialize(name=""):
 
 
 def ca_save_state(ca=None, name=""):
-    with open(name + ".sav", 'w') as f:
+    ca_filename = os.path.join(get_account_dir(), name + ".sav")
+    with open(ca_filename, 'w') as f:
         pickle.dump(ca, f)
 
 
@@ -602,11 +608,14 @@ class UpdateUserInfo(object):
 
 def cleanup_followers(api, ca_follow=None, ca_stat=None):
     me = api.me()
-    friends_diff = me.friends_count - (cfg.number_active_follows + 10)
+    # friends diff denotes the number of friends in the account that exceed the settings
+    friends_diff = me.friends_count - cfg.number_active_follows
+    print 'Friends Diff', friends_diff
     friends_ids = get_friends_ids(api=api, user=me)
     print len(friends_ids), "friends found"
+    print friends_diff
     if friends_diff > 0:
-        for friend in random.sample(friends_ids, friends_diff + 20):
+        for friend in random.sample(friends_ids, friends_diff + 5):
             # replace screen name and pop ids from friends and refresh cyclic array
             user = api.get_user(friend)
             screen_name = user.screen_name

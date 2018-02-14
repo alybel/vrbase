@@ -300,9 +300,9 @@ class FavListener(tweepy.StreamListener):
                         update_candidate = False
                         logr.info("$$MissedStatusUpdateStatusScoreTooLowStage2;%d;%s;%s" % (score2, text, url))
                     # Introduce some randomness such that not everything is automatically posted
-                    if update_candidate and text and random.random() < cfg.status_update_prob:
+                    if update_candidate and text:#Changed # and random.random() < cfg.status_update_prob:
                         if ManageUpdatesPerDay.max_reached()  == 1:
-                            if bbl.in_time():
+                            if  bbl.in_time():
                                 bbl.update_status(text=text, api=self.api, score=score)
                                 self.ca_recent_tweets.add(text, auto_increase=True)
                                 ManageUpdatesPerDay.add_update()
@@ -360,6 +360,7 @@ if __name__ == "__main__":
     #ToDo properly catch cases where no db entry was found
     try:
         # Try to load from database
+        cfg = load_config.load_config(sysargs.location)
         cfg = load_config.load_config(sysargs.location)
         load_config.check_if_folder_exists_or_create(cfg.own_twittername)
     except AttributeError: #Bad method of checking this
